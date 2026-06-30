@@ -1,0 +1,70 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/claude-docs-helper.sh.template'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Get all history for changelog
+
+    - name: Extract version from helper script
+      id: version
+      run: |
+        VERSION=$(grep "^SCRIPT_VERSION=" scripts/claude-docs-helper.sh.template | cut -d'"' -f2)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION"
+
+    - name: Check if release exists
+      id: check_release
+      run: |
+        if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "Release ${{ steps.version.outputs.tag }} already exists"
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "Release ${{ steps.version.outputs.tag }} does not exist"
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create release
+      if: steps.check_release.outputs.exists == 'false'
+      run: |
+        gh release create "${{ steps.version.outputs.tag }}" \
+          --title "Claude Code Docs ${{ steps.version.outputs.tag }}" \
+          --generate-notes \
+          --notes "
+        ## Claude Code Documentation Mirror ${{ steps.version.outputs.tag }}
+
+        This release includes the latest updates to the Claude Code documentation mirror.
+
+        ### Installation
+
+        \`\`\`bash
+        curl -fsSL https://raw.githubusercontent.com/ericbuess/claude-code-docs/main/install.sh | bash
+        \`\`\`
+
+        ### What's Changed (Auto-generated)
+        "
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release already exists
+      if: steps.check_release.outputs.exists == 'true'
+      run: |
+        echo "ℹ️ Release ${{ steps.version.outputs.tag }} already exists, skipping creation"
