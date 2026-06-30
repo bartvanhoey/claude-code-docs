@@ -227,7 +227,7 @@ migrate_installation() {
     
     # Fresh install at new location
     echo "Installing fresh at ~/.claude-code-docs..."
-    git clone -b "$INSTALL_BRANCH" https://github.com/ericbuess/claude-code-docs.git "$INSTALL_DIR"
+    git clone -b "$INSTALL_BRANCH" https://github.com/bartvanhoey/claude-code-docs.git "$INSTALL_DIR"
     cd "$INSTALL_DIR"
     
     # Remove old directory if safe
@@ -470,7 +470,7 @@ else
         echo "No existing installation found"
         echo "Installing fresh to ~/.claude-code-docs..."
         
-        git clone -b "$INSTALL_BRANCH" https://github.com/ericbuess/claude-code-docs.git "$INSTALL_DIR"
+        git clone -b "$INSTALL_BRANCH" https://github.com/bartvanhoey/claude-code-docs.git "$INSTALL_DIR"
         cd "$INSTALL_DIR"
     fi
 fi
@@ -493,7 +493,7 @@ if [[ -f "$INSTALL_DIR/scripts/claude-docs-helper.sh.template" ]]; then
 else
     echo "  ⚠️  Template file missing, attempting recovery..."
     # Try to fetch just the template file
-    if curl -fsSL "https://raw.githubusercontent.com/ericbuess/claude-code-docs/$INSTALL_BRANCH/scripts/claude-docs-helper.sh.template" -o "$INSTALL_DIR/claude-docs-helper.sh" 2>/dev/null; then
+    if curl -fsSL "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/$INSTALL_BRANCH/scripts/claude-docs-helper.sh.template" -o "$INSTALL_DIR/claude-docs-helper.sh" 2>/dev/null; then
         chmod +x "$INSTALL_DIR/claude-docs-helper.sh"
         echo "  ✓ Helper script downloaded directly"
     else
@@ -517,7 +517,7 @@ if [[ -f "$INSTALL_DIR/scripts/docs-command.md.template" ]]; then
     cp "$INSTALL_DIR/scripts/docs-command.md.template" ~/.claude/commands/docs.md
 else
     echo "  ⚠️  docs-command.md.template missing, attempting recovery..."
-    if curl -fsSL "https://raw.githubusercontent.com/ericbuess/claude-code-docs/$INSTALL_BRANCH/scripts/docs-command.md.template" -o ~/.claude/commands/docs.md 2>/dev/null; then
+    if curl -fsSL "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/$INSTALL_BRANCH/scripts/docs-command.md.template" -o ~/.claude/commands/docs.md 2>/dev/null; then
         echo "  ✓ docs command downloaded directly"
     else
         echo "  ❌ Failed to install /docs command"
