@@ -163,7 +163,7 @@
 
 #### 🟡 Medium Priority
 
-- **`install.sh` — version string duplicated in 4 places**  
+- **`install.sh` — version string duplicated in 4 places** ✅ Fixed 2026-06-30  
   `0.3.4` appears in: the shebang comment (line 4), the first `echo` (line 7), the `echo "Setting up..."` line (line 445 area), and the success message (line 568 area). The `release.yml` workflow reads the version from the helper template (`SCRIPT_VERSION=`), not from `install.sh`. So `install.sh` and `uninstall.sh` version strings are never auto-released — they drift silently.  
   - **Recommendation:** Define `INSTALLER_VERSION` once at the top of `install.sh` and reference it via `$INSTALLER_VERSION` in all echo statements. Add a CI check that `SCRIPT_VERSION` in the template matches `INSTALLER_VERSION` in `install.sh`.  
   - **Effort:** 30 min

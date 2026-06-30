@@ -1,10 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-# Claude Code Docs Installer v0.3.4 - Windows compatibility
+# Claude Code Docs Installer - Windows compatibility
 # This script installs/migrates claude-code-docs to ~/.claude-code-docs
 
-echo "Claude Code Docs Installer v0.3.4"
+INSTALLER_VERSION="0.3.4"
+
+echo "Claude Code Docs Installer v$INSTALLER_VERSION"
 echo "==============================="
 
 # Fixed installation location
@@ -475,7 +477,7 @@ fi
 
 # Now we're in $INSTALL_DIR, set up the new script-based system
 echo ""
-echo "Setting up Claude Code Docs v0.3.4..."
+echo "Setting up Claude Code Docs v$INSTALLER_VERSION..."
 
 # On Windows, ensure jq is still on PATH after cd into INSTALL_DIR
 if [[ "$OS_TYPE" == "windows" ]]; then
@@ -598,7 +600,7 @@ cleanup_old_installations
 
 # Success message
 echo ""
-echo "✅ Claude Code Docs v0.3.4 installed successfully!"
+echo "✅ Claude Code Docs v$INSTALLER_VERSION installed successfully!"
 echo ""
 echo "📚 Command: /docs (user)"
 echo "📂 Location: ~/.claude-code-docs"
