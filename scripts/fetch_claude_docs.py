@@ -137,14 +137,8 @@ def discover_sitemap_and_base_url(session: requests.Session) -> Tuple[str, str]:
             if response.status_code == 200:
                 # Extract base URL from the first URL in sitemap
                 # Parse XML safely to prevent XXE attacks
-                try:
-                    # Try with security parameters (Python 3.8+)
-                    parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
-                    root = ET.fromstring(response.content, parser=parser)
-                except TypeError:
-                    # Fallback for older Python versions
-                    logger.warning("XMLParser security parameters not available, using default parser")
-                    root = ET.fromstring(response.content)
+                parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
+                root = ET.fromstring(response.content, parser=parser)
                 
                 # Try with namespace first
                 namespace = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -185,15 +179,9 @@ def discover_claude_code_pages(session: requests.Session, sitemap_url: str) -> L
         response = session.get(sitemap_url, headers=HEADERS, timeout=30)
         response.raise_for_status()
         
-        # Parse XML sitemap safely
-        try:
-            # Try with security parameters (Python 3.8+)
-            parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
-            root = ET.fromstring(response.content, parser=parser)
-        except TypeError:
-            # Fallback for older Python versions
-            logger.warning("XMLParser security parameters not available, using default parser")
-            root = ET.fromstring(response.content)
+        # Parse XML sitemap safely (Python 3.8+ required — no insecure fallback)
+        parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
+        root = ET.fromstring(response.content, parser=parser)
         
         # Extract all URLs from sitemap
         urls = []

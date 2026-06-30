@@ -115,7 +115,7 @@
 
 #### 🟢 Low Priority / Observations
 
-- **`scripts/fetch_claude_docs.py` — XML parsing security parameters have a fallback that defeats the protection**  
+- **`scripts/fetch_claude_docs.py` — XML parsing security parameters have a fallback that defeats the protection** ✅ Fixed 2026-06-30  
   Lines 142–147 try `ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)` but fall back to the default parser on `TypeError`. The comment says "older Python", but Python 3.8+ is required by the workflow. The fallback is effectively dead code that could be removed, and the try/except masks the actual error if `XMLParser` ever changes its signature.  
   - **Recommendation:** Remove the fallback; fail loudly if the secure parser can't be constructed.  
   - **Effort:** 5 min
