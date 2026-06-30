@@ -34,7 +34,7 @@
   - **Recommendation:** Call `ensure_jq_windows` exactly once, after `git clone`/update has completed and `$INSTALL_DIR` is guaranteed to exist. Remove the early call; let the dependency check simply fail with a clear message if `jq` is missing pre-clone, and handle the download as part of the post-clone setup.  
   - **Effort:** 30 min
 
-- **`scripts/claude-docs-helper.sh.template:66–68` — auto-update silently re-runs `install.sh`**  
+- **`scripts/claude-docs-helper.sh.template:66–68` — auto-update silently re-runs `install.sh`** ✅ Fixed 2026-06-30  
   `auto_update()` calls `./install.sh >/dev/null 2>&1` after every `git pull` when `VERSION_INT >= 3`. This means every `/docs` command that triggers an update also silently re-runs the full installer. Problems: (1) the installer modifies `~/.claude/settings.json` — running it on every doc read is destructive side-effecting behavior; (2) no recursion guard — if `install.sh` itself calls the helper, there's a loop risk; (3) output suppressed, so failures are invisible; (4) `./install.sh` assumes CWD is `$DOCS_PATH`, which is set by `cd "$DOCS_PATH"` earlier in `auto_update()` — fragile.  
   - **Impact:** Settings file repeatedly rewritten; installer side effects (hook deduplication, command file overwrite) triggered on every sync. On Windows, `install.sh` will now also download `jq.exe` on every update cycle.  
   - **Recommendation:** Remove the `./install.sh` call from `auto_update()`. Self-updating installers should be opt-in (e.g. prompt the user or provide a `/docs update` command). If auto-upgrade is desired, check a version file instead and only upgrade when the version actually changes.  
@@ -63,7 +63,7 @@
   - **Recommendation:** After `git clone`, move `$HOME/.claude/bin/jq.exe` to `$INSTALL_DIR/bin/jq.exe` if it exists, or consolidate to a single call site post-clone.  
   - **Effort:** 30 min
 
-- **`scripts/claude-docs-helper.sh.template:158–168` — version comparison uses fragile string arithmetic**  
+- **`scripts/claude-docs-helper.sh.template:158–168` — version comparison uses fragile string arithmetic** ✅ Fixed 2026-06-30  
   ```bash
   local VERSION_INT=$(echo "$INSTALLER_VERSION" | sed 's/^0\.//' | cut -d. -f1)
   if [[ $VERSION_INT -ge 3 ]]; then

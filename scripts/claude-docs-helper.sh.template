@@ -57,17 +57,8 @@ auto_update() {
         # We're behind - safe to pull
         echo "🔄 Updating documentation..." >&2
         git pull --quiet origin "$BRANCH" 2>&1 | grep -v "Merge made by" || true
-        
-        # Check if installer needs updating
-        local INSTALLER_VERSION=$SCRIPT_VERSION
-        local VERSION_INT=$(echo "$INSTALLER_VERSION" | sed 's/^0\.//' | cut -d. -f1)
-
-        if [[ $VERSION_INT -ge 3 ]]; then
-            echo "🔧 Updating Claude Code Docs installer..." >&2
-            ./install.sh >/dev/null 2>&1
-        fi
     fi
-    
+
     return 0  # Success (either updated or already up-to-date)
 }
 
@@ -159,14 +150,6 @@ read_doc() {
             # We're behind - safe to update
             echo "🔄 Updating to latest documentation..."
             git pull --quiet origin "$COMPARE_BRANCH" 2>&1 | grep -v "Merge made by" || true
-            
-            # Check if installer needs updating
-            local INSTALLER_VERSION=$SCRIPT_VERSION
-            local VERSION_INT=$(echo "$INSTALLER_VERSION" | sed 's/^0\.//' | cut -d. -f1)
-
-            if [[ $VERSION_INT -ge 3 ]]; then
-                ./install.sh >/dev/null 2>&1
-            fi
             echo "✅ Updated to latest (v$VERSION, $BRANCH)"
         else
             local AHEAD=$(git rev-list origin/"$COMPARE_BRANCH"..HEAD --count 2>/dev/null || echo "0")
