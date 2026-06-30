@@ -47,7 +47,7 @@
   - **Recommendation:** Use `pushd`/`popd` pairs, or prefix every git command with `-C "$repo_dir"` instead of `cd`-ing. Never rely on implicit CWD state across function boundaries.  
   - **Effort:** 1 hour
 
-- **`install.sh` — monolithic script (570+ lines), no modular structure**  
+- **`install.sh` — monolithic script (570+ lines), no modular structure** ⏭ Skipped — remind me later  
   All logic — OS detection, dependency management, git operations, config patching, command generation — is in one file. Functions are interleaved with top-level code in a way that makes the execution flow hard to follow.  
   - **Recommendation:** No immediate refactor needed, but future additions should go into sourced helper scripts (e.g. `scripts/install-helpers.sh`).  
   - **Effort:** 2 days (low priority)
@@ -74,7 +74,7 @@
 
 #### 🟡 Medium Priority
 
-- **`install.sh:121,141,153` — `local` variable reuse with same name `path` in nested loops**  
+- **`install.sh:121,141,153` — `local` variable reuse with same name `path` in nested loops** ✅ Fixed 2026-06-30  
   `find_existing_installations()` declares `local path` multiple times in the same function scope (lines 114, 121, 133, etc.). In bash, `local` scopes to the function, not the block — redeclaring `local path` in a nested loop does not create a new scope; it just resets the same variable. This is confusing and can produce subtle bugs when loop iterations bleed state.  
   - **Recommendation:** Use distinct variable names (`v01_path`, `found_path`, etc.) for each loop variable.  
   - **Effort:** 20 min

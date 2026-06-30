@@ -117,55 +117,59 @@ find_existing_installations() {
         while IFS= read -r line; do
             # v0.1 format
             if [[ "$line" =~ LOCAL\ DOCS\ AT:\ ([^[:space:]]+)/docs/ ]]; then
-                local path="${BASH_REMATCH[1]}"
-                path="${path/#\~/$HOME}"
-                [[ -d "$path" ]] && paths+=("$path")
+                local v01_path="${BASH_REMATCH[1]}"
+                v01_path="${v01_path/#\~/$HOME}"
+                [[ -d "$v01_path" ]] && paths+=("$v01_path")
             fi
             # v0.2+ format
             if [[ "$line" =~ Execute:.*claude-code-docs ]]; then
                 # Extract path from various formats
-                local path=$(echo "$line" | grep -o '[^ "]*claude-code-docs[^ "]*' | head -1)
-                path="${path/#\~/$HOME}"
-                
+                local cmd_path
+                cmd_path=$(echo "$line" | grep -o '[^ "]*claude-code-docs[^ "]*' | head -1)
+                cmd_path="${cmd_path/#\~/$HOME}"
+
                 # Get directory part
-                if [[ -d "$path" ]]; then
-                    paths+=("$path")
-                elif [[ -d "$(dirname "$path")" ]] && [[ "$(basename "$(dirname "$path")")" == "claude-code-docs" ]]; then
-                    paths+=("$(dirname "$path")")
+                if [[ -d "$cmd_path" ]]; then
+                    paths+=("$cmd_path")
+                elif [[ -d "$(dirname "$cmd_path")" ]] && [[ "$(basename "$(dirname "$cmd_path")")" == "claude-code-docs" ]]; then
+                    paths+=("$(dirname "$cmd_path")")
                 fi
             fi
         done < ~/.claude/commands/docs.md
     fi
-    
+
     # Check settings.json hooks for paths
     if [[ -f ~/.claude/settings.json ]]; then
-        local hooks=$(jq -r '.hooks.PreToolUse[]?.hooks[]?.command // empty' ~/.claude/settings.json 2>/dev/null)
+        local hooks
+        hooks=$(jq -r '.hooks.PreToolUse[]?.hooks[]?.command // empty' ~/.claude/settings.json 2>/dev/null)
         while IFS= read -r cmd; do
             if [[ "$cmd" =~ claude-code-docs ]]; then
                 # Extract paths from v0.1 complex hook format
                 # Look for patterns like: "/path/to/claude-code-docs/.last_check"
-                local v01_paths=$(echo "$cmd" | grep -o '"[^"]*claude-code-docs[^"]*"' | sed 's/"//g' || true)
-                while IFS= read -r path; do
-                    [[ -z "$path" ]] && continue
+                local v01_hook_paths
+                v01_hook_paths=$(echo "$cmd" | grep -o '"[^"]*claude-code-docs[^"]*"' | sed 's/"//g' || true)
+                while IFS= read -r hook_path; do
+                    [[ -z "$hook_path" ]] && continue
                     # Extract just the directory part
-                    if [[ "$path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
-                        path="${BASH_REMATCH[1]}"
-                        path="${path/#\~/$HOME}"
-                        [[ -d "$path" ]] && paths+=("$path")
+                    if [[ "$hook_path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
+                        hook_path="${BASH_REMATCH[1]}"
+                        hook_path="${hook_path/#\~/$HOME}"
+                        [[ -d "$hook_path" ]] && paths+=("$hook_path")
                     fi
-                done <<< "$v01_paths"
-                
+                done <<< "$v01_hook_paths"
+
                 # Also try v0.2+ simpler format
-                local found=$(echo "$cmd" | grep -o '[^ "]*claude-code-docs[^ "]*' || true)
-                while IFS= read -r path; do
-                    [[ -z "$path" ]] && continue
-                    path="${path/#\~/$HOME}"
+                local found_paths
+                found_paths=$(echo "$cmd" | grep -o '[^ "]*claude-code-docs[^ "]*' || true)
+                while IFS= read -r found_path; do
+                    [[ -z "$found_path" ]] && continue
+                    found_path="${found_path/#\~/$HOME}"
                     # Clean up path to get the claude-code-docs directory
-                    if [[ "$path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
-                        path="${BASH_REMATCH[1]}"
+                    if [[ "$found_path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
+                        found_path="${BASH_REMATCH[1]}"
                     fi
-                    [[ -d "$path" ]] && paths+=("$path")
-                done <<< "$found"
+                    [[ -d "$found_path" ]] && paths+=("$found_path")
+                done <<< "$found_paths"
             fi
         done <<< "$hooks"
     fi
