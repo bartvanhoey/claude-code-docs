@@ -84,7 +84,7 @@
   - **Recommendation:** Move `fetch_changelog(session)` inside the `with` block.  
   - **Effort:** 5 min
 
-- **`scripts/claude-docs-helper.sh.template:263–280` — `whats_new()` uses `((count++))` inside `while read` loop**  
+- **`scripts/claude-docs-helper.sh.template:263–280` — `whats_new()` uses `((count++))` inside `while read` loop** ✅ Fixed 2026-06-30  
   `((count++))` returns exit code 1 when count is 0 (incrementing from 0 to 1 is fine, but `(( 0 ))` is falsy in bash and would exit under `set -e`). The function uses `set +e` at the top to work around this, but then `set -e` is restored at the end — meaning any error inside `whats_new` is silently swallowed. This is a broad suppression applied to avoid one narrow issue.  
   - **Recommendation:** Replace `((count++))` with `count=$((count + 1))` which always returns exit code 0. Then the `set +e` guard can be removed.  
   - **Effort:** 5 min

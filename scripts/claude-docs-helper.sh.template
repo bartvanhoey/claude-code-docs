@@ -224,9 +224,6 @@ hook_check() {
 
 # Function to show what's new (simplified version)
 whats_new() {
-    # Temporarily disable strict error handling for this function
-    set +e
-    
     print_doc_header
     
     # Auto-update first (synchronous - we need latest git history)
@@ -259,22 +256,16 @@ whats_new() {
             done
         fi
         echo ""
-        ((count++))
+        count=$((count + 1))
     done < <(git log --oneline -10 -- docs/*.md 2>/dev/null | grep -v "Merge" || true)
-    
+
     if [[ $count -eq 0 ]]; then
         echo "No recent documentation updates found."
         echo ""
     fi
-    
+
     echo "📎 Full changelog: https://github.com/ericbuess/claude-code-docs/commits/main/docs"
     echo "📚 COMMUNITY MIRROR - NOT AFFILIATED WITH ANTHROPIC"
-    
-    # Re-enable strict error handling
-    set -e
-    
-    # Ensure we always exit successfully
-    return 0
 }
 
 # Function for uninstall
