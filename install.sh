@@ -38,10 +38,16 @@ ensure_jq_windows() {
         return 0
     fi
 
-    # Check both candidate locations
+    # Prefer $INSTALL_DIR/bin; fall back to $HOME/.claude/bin on fresh install
     local bin_dir
     if [[ -d "$INSTALL_DIR" ]]; then
         bin_dir="$INSTALL_DIR/bin"
+        # If jq was previously downloaded to the bootstrap location, move it over
+        # rather than downloading again.
+        if [[ ! -f "$bin_dir/jq.exe" && -f "$HOME/.claude/bin/jq.exe" ]]; then
+            mkdir -p "$bin_dir"
+            mv "$HOME/.claude/bin/jq.exe" "$bin_dir/jq.exe"
+        fi
     else
         bin_dir="$HOME/.claude/bin"
     fi

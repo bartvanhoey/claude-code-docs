@@ -58,7 +58,7 @@
 
 #### 🔴 Critical / High Priority
 
-- **`install.sh:87–89` — `ensure_jq_windows` called in dependency check but `ensure_jq_windows` uses `$INSTALL_DIR` which may not exist**  
+- **`install.sh:87–89` — `ensure_jq_windows` called in dependency check but `ensure_jq_windows` uses `$INSTALL_DIR` which may not exist** ✅ Fixed 2026-06-30  
   On a fresh install, `$INSTALL_DIR` (`~/.claude-code-docs`) does not exist when `ensure_jq_windows` is first called. The function correctly falls back to `$HOME/.claude/bin`, but after `git clone` creates `$INSTALL_DIR`, the second call at line 449 will use `$INSTALL_DIR/bin` — meaning jq could end up in `$HOME/.claude/bin` (from the first call) but the second call looks in `$INSTALL_DIR/bin` and finds nothing, re-downloading it. Net result: jq downloaded twice on fresh Windows install.  
   - **Recommendation:** After `git clone`, move `$HOME/.claude/bin/jq.exe` to `$INSTALL_DIR/bin/jq.exe` if it exists, or consolidate to a single call site post-clone.  
   - **Effort:** 30 min
