@@ -575,41 +575,41 @@ def main():
                 logger.error(f"Failed to process {page_path}: {e}")
                 failed += 1
                 failed_pages.append(page_path)
-    
-    # Fetch Claude Code changelog
-    logger.info("Fetching Claude Code changelog...")
-    try:
-        filename, content = fetch_changelog(session)
-        
-        # Check if content has changed
-        old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
-        old_entry = manifest.get("files", {}).get(filename, {})
-        
-        if content_has_changed(content, old_hash):
-            content_hash = save_markdown_file(docs_dir, filename, content)
-            logger.info(f"Updated: {filename}")
-            last_updated = datetime.now().isoformat()
-        else:
-            content_hash = old_hash
-            logger.info(f"Unchanged: {filename}")
-            last_updated = old_entry.get("last_updated", datetime.now().isoformat())
-        
-        new_manifest["files"][filename] = {
-            "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
-            "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-            "hash": content_hash,
-            "last_updated": last_updated,
-            "source": "claude-code-repository"
-        }
-        
-        fetched_files.add(filename)
-        successful += 1
-        
-    except Exception as e:
-        logger.error(f"Failed to fetch changelog: {e}")
-        failed += 1
-        failed_pages.append("changelog")
-    
+
+        # Fetch Claude Code changelog
+        logger.info("Fetching Claude Code changelog...")
+        try:
+            filename, content = fetch_changelog(session)
+
+            # Check if content has changed
+            old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
+            old_entry = manifest.get("files", {}).get(filename, {})
+
+            if content_has_changed(content, old_hash):
+                content_hash = save_markdown_file(docs_dir, filename, content)
+                logger.info(f"Updated: {filename}")
+                last_updated = datetime.now().isoformat()
+            else:
+                content_hash = old_hash
+                logger.info(f"Unchanged: {filename}")
+                last_updated = old_entry.get("last_updated", datetime.now().isoformat())
+
+            new_manifest["files"][filename] = {
+                "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+                "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
+                "hash": content_hash,
+                "last_updated": last_updated,
+                "source": "claude-code-repository"
+            }
+
+            fetched_files.add(filename)
+            successful += 1
+
+        except Exception as e:
+            logger.error(f"Failed to fetch changelog: {e}")
+            failed += 1
+            failed_pages.append("changelog")
+
     # Clean up old files (only those we previously fetched)
     cleanup_old_files(docs_dir, fetched_files, manifest)
     

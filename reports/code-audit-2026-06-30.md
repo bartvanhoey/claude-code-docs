@@ -79,7 +79,7 @@
   - **Recommendation:** Use distinct variable names (`v01_path`, `found_path`, etc.) for each loop variable.  
   - **Effort:** 20 min
 
-- **`scripts/fetch_claude_docs.py:584–612` — changelog fetch happens outside the `with requests.Session()` block**  
+- **`scripts/fetch_claude_docs.py:584–612` — changelog fetch happens outside the `with requests.Session()` block** ✅ Fixed 2026-06-30  
   The `fetch_changelog()` call at line 580 is made after the `with requests.Session() as session:` block closes (line 578 ends the `with`). So `session` is a closed session object when passed to `fetch_changelog`. Python's `requests.Session` does not error on a closed session — it silently continues to work — but this is semantically wrong and will behave incorrectly if session-level settings (auth headers, retries, cookies) are ever added.  
   - **Recommendation:** Move `fetch_changelog(session)` inside the `with` block.  
   - **Effort:** 5 min
