@@ -1,12 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-# Claude Code Documentation Helper Script v0.3.3
+# Claude Code Documentation Helper Script v0.3.4
 # This script handles all /docs command functionality  
 # Installation path: ~/.claude-code-docs/claude-docs-helper.sh
 
 # Script version
-SCRIPT_VERSION="0.3.3"
+SCRIPT_VERSION="0.3.4"
 
 # Fixed installation path (no need for placeholder replacement)
 DOCS_PATH="$HOME/.claude-code-docs"
@@ -201,16 +201,16 @@ read_doc() {
             
             if [[ -n "$matches" ]]; then
                 echo "Found these related topics:"
-                echo "$matches" | sed 's/^/  • /' 
+                echo "$matches" | sed 's/^/  • /'
                 echo ""
                 echo "Try: /docs <topic> to read a specific document"
             else
                 echo "No exact matches found. Here are all available topics:"
-                ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 80
+                ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort
             fi
         else
             echo "Available topics:"
-            ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 80
+            ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort
         fi
         echo ""
         echo "💡 Tip: Use grep to search across all docs: cd ~/.claude-code-docs && grep -r 'search term' docs/"
@@ -226,7 +226,7 @@ list_docs() {
     
     echo "Available documentation topics:"
     echo ""
-    ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 80
+    ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort
     echo ""
     echo "Usage: /docs <topic> or /docs -t to check freshness"
 }

@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# Claude Code Docs Installer v0.3.3 - Changelog integration and compatibility improvements
+# Claude Code Docs Installer v0.3.4 - Windows compatibility
 # This script installs/migrates claude-code-docs to ~/.claude-code-docs
 
-echo "Claude Code Docs Installer v0.3.3"
+echo "Claude Code Docs Installer v0.3.4"
 echo "==============================="
 
 # Fixed installation location
@@ -20,21 +20,82 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS_TYPE="linux"
     echo "✓ Detected Linux"
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    OS_TYPE="windows"
+    echo "✓ Detected Windows"
 else
     echo "❌ Error: Unsupported OS type: $OSTYPE"
-    echo "This installer supports macOS and Linux only"
+    echo "This installer supports macOS, Linux, and Windows (Git Bash) only"
     exit 1
 fi
 
-# Check dependencies
-echo "Checking dependencies..."
-for cmd in git jq curl; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "❌ Error: $cmd is required but not installed"
-        echo "Please install $cmd and try again"
+# On Windows, ensure jq is available (download if needed).
+# Uses $INSTALL_DIR/bin when it exists; falls back to $HOME/.claude/bin for
+# bootstrap cases (fresh install where $INSTALL_DIR doesn't exist yet).
+ensure_jq_windows() {
+    # Already on PATH?
+    if command -v jq &> /dev/null; then
+        return 0
+    fi
+
+    # Check both candidate locations
+    local bin_dir
+    if [[ -d "$INSTALL_DIR" ]]; then
+        bin_dir="$INSTALL_DIR/bin"
+    else
+        bin_dir="$HOME/.claude/bin"
+    fi
+
+    if [[ -f "$bin_dir/jq.exe" ]]; then
+        export PATH="$bin_dir:$PATH"
+        return 0
+    fi
+
+    echo "  jq not found — downloading for Windows..."
+    mkdir -p "$bin_dir"
+
+    # Detect CPU architecture
+    local arch
+    arch=$(uname -m 2>/dev/null || echo "x86_64")
+    local jq_asset
+    case "$arch" in
+        aarch64|arm64) jq_asset="jq-windows-arm64.exe" ;;
+        *)             jq_asset="jq-windows-amd64.exe" ;;
+    esac
+
+    local jq_url="https://github.com/jqlang/jq/releases/latest/download/$jq_asset"
+    if curl -fsSL "$jq_url" -o "$bin_dir/jq.exe"; then
+        chmod +x "$bin_dir/jq.exe"
+        export PATH="$bin_dir:$PATH"
+        echo "  ✓ jq downloaded ($jq_asset)"
+    else
+        echo "❌ Error: Could not download jq. Please install jq manually and try again."
         exit 1
     fi
-done
+}
+
+# Check dependencies
+echo "Checking dependencies..."
+if [[ "$OS_TYPE" == "windows" ]]; then
+    for cmd in git curl; do
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "❌ Error: $cmd is required but not installed"
+            echo "Please install $cmd and try again"
+            exit 1
+        fi
+    done
+    # jq is not bundled with Git for Windows — download it now so all subsequent
+    # jq calls (including find_existing_installations) work correctly.
+    ensure_jq_windows
+else
+    for cmd in git jq curl; do
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "❌ Error: $cmd is required but not installed"
+            echo "Please install $cmd and try again"
+            exit 1
+        fi
+    done
+fi
 echo "✓ All dependencies satisfied"
 
 
@@ -381,7 +442,12 @@ fi
 
 # Now we're in $INSTALL_DIR, set up the new script-based system
 echo ""
-echo "Setting up Claude Code Docs v0.3.3..."
+echo "Setting up Claude Code Docs v0.3.4..."
+
+# On Windows, ensure jq is still on PATH after cd into INSTALL_DIR
+if [[ "$OS_TYPE" == "windows" ]]; then
+    ensure_jq_windows
+fi
 
 # Copy helper script from template
 echo "Installing helper script..."
@@ -448,7 +514,7 @@ When showing what's new:
 Every request checks for the latest documentation from GitHub (takes ~0.4s).
 The helper script handles all functionality including auto-updates.
 
-Execute: ~/.claude-code-docs/claude-docs-helper.sh "$ARGUMENTS"
+Execute: $HOME/.claude-code-docs/claude-docs-helper.sh "$ARGUMENTS"
 EOF
 
 echo "✓ Created /docs command"
@@ -457,7 +523,7 @@ echo "✓ Created /docs command"
 echo "Setting up automatic updates..."
 
 # Simple hook that just calls the helper script
-HOOK_COMMAND="~/.claude-code-docs/claude-docs-helper.sh hook-check"
+HOOK_COMMAND="$HOME/.claude-code-docs/claude-docs-helper.sh hook-check"
 
 if [ -f ~/.claude/settings.json ]; then
     # Update existing settings.json
@@ -499,7 +565,7 @@ cleanup_old_installations
 
 # Success message
 echo ""
-echo "✅ Claude Code Docs v0.3.3 installed successfully!"
+echo "✅ Claude Code Docs v0.3.4 installed successfully!"
 echo ""
 echo "📚 Command: /docs (user)"
 echo "📂 Location: ~/.claude-code-docs"
@@ -512,6 +578,6 @@ echo ""
 echo "🔄 Auto-updates: Enabled - syncs automatically when GitHub has newer content"
 echo ""
 echo "Available topics:"
-ls "$INSTALL_DIR/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 60
+ls "$INSTALL_DIR/docs" | grep '\.md$' | sed 's/\.md$//' | sort
 echo ""
 echo "⚠️  Note: Restart Claude Code for auto-updates to take effect"

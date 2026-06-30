@@ -8,6 +8,22 @@ echo "Claude Code Documentation Mirror - Uninstaller"
 echo "=============================================="
 echo ""
 
+# Ensure jq is available on Windows (reuse cached binary from installation)
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    if ! command -v jq &> /dev/null; then
+        for candidate in "$HOME/.claude-code-docs/bin/jq.exe" "$HOME/.claude/bin/jq.exe"; do
+            if [[ -f "$candidate" ]]; then
+                export PATH="$(dirname "$candidate"):$PATH"
+                break
+            fi
+        done
+        if ! command -v jq &> /dev/null; then
+            echo "❌ Error: jq not found. Re-run the installer first to download it, then uninstall."
+            exit 1
+        fi
+    fi
+fi
+
 # Find all installations from configs
 find_all_installations() {
     local paths=()
@@ -114,9 +130,9 @@ if [[ ${#installations[@]} -gt 0 ]]; then
         
         if [[ -d "$path/.git" ]]; then
             # Save current directory
-            local current_dir=$(pwd)
+            current_dir=$(pwd)
             cd "$path"
-            
+
             if [[ -z "$(git status --porcelain 2>/dev/null)" ]]; then
                 cd "$current_dir"
                 rm -rf "$path"

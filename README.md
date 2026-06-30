@@ -1,7 +1,7 @@
 # Claude Code Documentation Mirror
 
 [![Last Update](https://img.shields.io/github/last-commit/ericbuess/claude-code-docs/main.svg?label=docs%20updated)](https://github.com/ericbuess/claude-code-docs/commits/main)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue)]()
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)]()
 [![Beta](https://img.shields.io/badge/status-early%20beta-orange)](https://github.com/ericbuess/claude-code-docs/issues)
 
 Local mirror of Claude Code documentation files from https://docs.anthropic.com/en/docs/claude-code/, updated every 3 hours.
@@ -10,13 +10,11 @@ Local mirror of Claude Code documentation files from https://docs.anthropic.com/
 
 **This is an early beta release**. There may be errors or unexpected behavior. If you encounter any issues, please [open an issue](https://github.com/ericbuess/claude-code-docs/issues) - your feedback helps improve the tool!
 
-## 🆕 Version 0.3.3 - Changelog Integration
+## 🆕 Version 0.3.4 - Windows Support
 
 **New in this version:**
-- 📋 **Claude Code Changelog**: Access the official Claude Code release notes with `/docs changelog`
-- 🍎 **Full macOS compatibility**: Fixed shell compatibility issues for Mac users
-- 🐧 **Linux support**: Tested on Ubuntu, Debian, and other distributions
-- 🔧 **Improved installer**: Better handling of updates and edge cases
+- 🪟 **Windows support**: Run the installer from Git Bash — `jq` is downloaded automatically (arch-detected: amd64 or arm64), no manual setup required
+- 🔧 **Improved path handling**: `$HOME` used instead of `~` in generated configs for better cross-platform compatibility
 
 To update:
 ```bash
@@ -35,14 +33,14 @@ curl -fsSL https://raw.githubusercontent.com/ericbuess/claude-code-docs/main/ins
 
 - ✅ **macOS**: Fully supported (tested on macOS 12+)
 - ✅ **Linux**: Fully supported (Ubuntu, Debian, Fedora, etc.)
-- ⏳ **Windows**: Not yet supported - [contributions welcome](#contributing)!
+- ✅ **Windows**: Supported via Git Bash — `jq` is downloaded automatically, no extra setup needed
 
 ### Prerequisites
 
 This tool requires the following to be installed:
-- **git** - For cloning and updating the repository (usually pre-installed)
-- **jq** - For JSON processing in the auto-update hook (pre-installed on macOS; Linux users may need `apt install jq` or `yum install jq`)
-- **curl** - For downloading the installation script (usually pre-installed)
+- **git** - For cloning and updating the repository (usually pre-installed; on Windows: [Git for Windows](https://git-scm.com/download/win))
+- **jq** - For JSON processing (pre-installed on macOS; Linux: `apt install jq` or `yum install jq`; **Windows: downloaded automatically by the installer**)
+- **curl** - For downloading (usually pre-installed; included with Git for Windows)
 - **Claude Code** - Obviously :)
 
 ## Installation
@@ -194,7 +192,12 @@ See [UNINSTALL.md](UNINSTALL.md) for manual uninstall instructions.
 
 ## What's New
 
-### v0.3.3 (Latest)
+### v0.3.4 (Latest)
+- Added Windows support via Git Bash — `jq` downloaded automatically with CPU arch detection (amd64/arm64)
+- `$HOME` used instead of `~` in generated hook and command configs for cross-platform reliability
+- `column` command removed (not available on Windows/MINGW); topic lists now use plain sorted output
+
+### v0.3.3
 - Added Claude Code changelog integration (`/docs changelog`)
 - Fixed shell compatibility for macOS users (zsh/bash)
 - Improved documentation and error messages
@@ -209,7 +212,6 @@ See [UNINSTALL.md](UNINSTALL.md) for manual uninstall instructions.
 
 **Contributions are welcome!** This is a community project and we'd love your help:
 
-- 🪟 **Windows Support**: Want to help add Windows compatibility? [Fork the repository](https://github.com/ericbuess/claude-code-docs/fork) and submit a PR!
 - 🐛 **Bug Reports**: Found something not working? [Open an issue](https://github.com/ericbuess/claude-code-docs/issues)
 - 💡 **Feature Requests**: Have an idea? [Start a discussion](https://github.com/ericbuess/claude-code-docs/issues)
 - 📝 **Documentation**: Help improve docs or add examples
