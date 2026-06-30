@@ -132,7 +132,7 @@
   - **Recommendation:** Move freshness checking to `hook_check` (which runs in the background as a PreToolUse hook) and have `read_doc` just read from disk. The hook fires before the Read tool — it's the right place for async prefetch. Cache the fetch result in a `.last_check` file with a TTL (e.g. 10 min).  
   - **Effort:** 2 hours
 
-- **`scripts/fetch_claude_docs.py:539–577` — sequential fetching of all doc pages**  
+- **`scripts/fetch_claude_docs.py:539–577` — sequential fetching of all doc pages** ⏭ Won't fix  
   Pages are fetched one at a time with a `0.5s` sleep between each. With ~170 pages, that's 85+ seconds of artificial delay just from rate limiting, on top of actual network time.  
   - **Impact:** GitHub Actions doc update job takes several minutes unnecessarily.  
   - **Recommendation:** Use `concurrent.futures.ThreadPoolExecutor` with a semaphore-based rate limiter (e.g. max 5 concurrent requests, 0.1s between batches). This would reduce total fetch time by ~10x.  
