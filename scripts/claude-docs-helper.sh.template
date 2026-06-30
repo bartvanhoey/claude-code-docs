@@ -301,7 +301,7 @@ uninstall() {
     echo "  ~/.claude-code-docs/uninstall.sh"
     echo ""
     echo "Or to skip confirmation:"
-    echo "  echo 'y' | ~/.claude-code-docs/uninstall.sh"
+    echo "  ~/.claude-code-docs/uninstall.sh --yes"
     echo ""
 }
 

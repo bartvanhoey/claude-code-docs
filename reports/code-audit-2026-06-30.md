@@ -180,7 +180,7 @@
 
 #### 🟢 Low Priority / Observations
 
-- **`uninstall.sh` — no `--yes` / `-y` flag for non-interactive use**  
+- **`uninstall.sh` — no `--yes` / `-y` flag for non-interactive use** ✅ Fixed 2026-06-30  
   The only way to skip the confirmation prompt is `echo 'y' | ./uninstall.sh`, which the docs actually recommend. A `--yes` flag would be cleaner for scripted environments.
 
 - **`scripts/fetch_claude_docs.py` — `random` module imported but `random.uniform` used for jitter**  

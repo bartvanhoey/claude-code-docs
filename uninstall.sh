@@ -8,6 +8,15 @@ echo "Claude Code Documentation Mirror - Uninstaller"
 echo "=============================================="
 echo ""
 
+# Parse arguments
+AUTO_YES=false
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes) AUTO_YES=true ;;
+        *) echo "Unknown argument: $arg"; exit 1 ;;
+    esac
+done
+
 # Ensure jq is available on Windows (reuse cached binary from installation)
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     if ! command -v jq &> /dev/null; then
@@ -92,11 +101,15 @@ if [[ ${#installations[@]} -gt 0 ]]; then
 fi
 echo ""
 
-read -p "Continue? (y/N): " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Cancelled."
-    exit 0
+if [[ "$AUTO_YES" == "true" ]]; then
+    echo "Proceeding automatically (-y/--yes)."
+else
+    read -p "Continue? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Cancelled."
+        exit 0
+    fi
 fi
 
 # Remove command file
