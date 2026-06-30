@@ -223,8 +223,8 @@ migrate_installation() {
 # Function to safely update git repository
 safe_git_update() {
     local repo_dir="$1"
-    cd "$repo_dir"
-    
+    pushd "$repo_dir" >/dev/null
+
     # Get current branch
     local current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
     
@@ -251,6 +251,7 @@ safe_git_update() {
     
     # Try regular pull first (use target branch)
     if git pull --quiet origin "$target_branch" 2>/dev/null; then
+        popd >/dev/null
         return 0
     fi
     
@@ -260,6 +261,7 @@ safe_git_update() {
     # Fetch latest
     if ! git fetch origin "$target_branch" 2>/dev/null; then
         echo "  ⚠️  Could not fetch from GitHub (offline?)"
+        popd >/dev/null
         return 1
     fi
     
@@ -319,6 +321,7 @@ safe_git_update() {
             echo "To proceed later, either:"
             echo "  1. Manually resolve the issues, or"
             echo "  2. Run the installer again and choose 'y' to discard changes"
+            popd >/dev/null
             return 1
         fi
         echo "  Proceeding with clean installation..."
@@ -359,7 +362,8 @@ safe_git_update() {
     git clean -fd >/dev/null 2>&1 || true
     
     echo "  ✓ Updated successfully to clean state"
-    
+
+    popd >/dev/null
     return 0
 }
 

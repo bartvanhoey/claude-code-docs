@@ -42,7 +42,7 @@
 
 #### 🟡 Medium Priority
 
-- **`install.sh` / `uninstall.sh` — `cd` without CWD restoration**  
+- **`install.sh` / `uninstall.sh` — `cd` without CWD restoration** ✅ Fixed 2026-06-30  
   Multiple functions (`safe_git_update`, `migrate_installation`, `cleanup_old_installations`) call `cd` without saving and restoring the working directory. `safe_git_update` does `cd "$repo_dir"` and returns, leaving the caller in a different directory. Subsequent code uses relative paths (`./install.sh`, paths relative to `$INSTALL_DIR`) that happen to work only because the script continues from the new CWD. One refactor that changes call order will silently break path resolution.  
   - **Recommendation:** Use `pushd`/`popd` pairs, or prefix every git command with `-C "$repo_dir"` instead of `cd`-ing. Never rely on implicit CWD state across function boundaries.  
   - **Effort:** 1 hour
