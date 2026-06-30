@@ -14,11 +14,17 @@ MANIFEST="$DOCS_PATH/docs/docs_manifest.json"
 
 # No colors since they don't work in terminal anyway
 
-# Enhanced sanitize function to prevent command injection
+# Sanitize a doc topic argument against path traversal.
+# Allows alphanumeric, spaces, hyphens, underscores, periods, commas, apostrophes,
+# and question marks — enough for all real topic names and natural-language queries.
+# Strips .. components and leading slashes so the result can never escape DOCS_PATH/docs.
 sanitize_input() {
-    # Remove ALL shell metacharacters and control characters
-    # Only allow alphanumeric, spaces, hyphens, underscores, periods, commas, apostrophes, and question marks
-    echo "$1" | sed 's/[^a-zA-Z0-9 _.,'\''?-]//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//'
+    local input="$1"
+    # Remove .. path traversal sequences and leading slashes
+    input="${input//../}"
+    input="${input#/}"
+    # Strip remaining shell metacharacters; keep characters valid in topic names / NL queries
+    echo "$input" | sed 's/[^a-zA-Z0-9 _.,'\''?/-]//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//'
 }
 
 # Function to print documentation header
@@ -112,11 +118,20 @@ show_freshness() {
 # Function to read documentation
 read_doc() {
     local topic=$(sanitize_input "$1")
-    
+
     # Strip .md extension if user included it (they're being helpful!)
     topic="${topic%.md}"
-    
+
     local doc_path="$DOCS_PATH/docs/${topic}.md"
+
+    # Containment check: resolved path must stay inside $DOCS_PATH/docs
+    local real_docs_dir real_doc_path
+    real_docs_dir=$(realpath "$DOCS_PATH/docs" 2>/dev/null || echo "$DOCS_PATH/docs")
+    real_doc_path=$(realpath "$doc_path" 2>/dev/null || echo "$doc_path")
+    if [[ "$real_doc_path" != "$real_docs_dir"/* ]]; then
+        echo "❌ Invalid topic: path escapes docs directory."
+        exit 1
+    fi
     
     if [[ -f "$doc_path" ]]; then
         print_doc_header

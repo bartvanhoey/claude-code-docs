@@ -107,7 +107,7 @@
   - **Recommendation:** Pin to a specific jq release version (e.g. `1.7.1`) and verify its SHA256 after download. The version can be a constant at the top of the script for easy maintenance.  
   - **Effort:** 30 min
 
-- **`scripts/claude-docs-helper.sh.template:18–21` — `sanitize_input` applied inconsistently**  
+- **`scripts/claude-docs-helper.sh.template:18–21` — `sanitize_input` applied inconsistently** ✅ Fixed 2026-06-30  
   `sanitize_input` is called for doc topic lookups but not for the `-t` / `--check` flag path (lines 329–332: `read_doc "$(sanitize_input "$remaining_args")"` — this one is sanitized) or the `whats-new` handler. More importantly, user input never reaches a shell `eval` or subprocess expansion directly in this script — all it does is construct a file path. Path traversal is the real risk here.  
   - **Impact:** `sanitize_input` strips `..` components, so `../../../etc/passwd` becomes `etcpasswd` — traversal is blocked. But the regex also strips `/`, meaning any valid subdirectory path would be broken. Low actual risk but inconsistent application creates a false sense of coverage.  
   - **Recommendation:** Replace `sanitize_input` with a targeted path traversal check: reject inputs containing `..`, then use `realpath --relative-to="$DOCS_PATH/docs"` to validate the resolved path stays within the docs directory. Drop the broad character stripping.  
