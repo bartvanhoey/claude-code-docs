@@ -148,7 +148,7 @@
 
 #### 🔴 Critical / High Priority
 
-- **No tests of any kind exist**  
+- **No tests of any kind exist** ⏭ Won't fix  
   There are no unit tests, integration tests, or smoke tests for any component — not for the bash scripts, not for the Python fetcher, not for the GitHub Actions workflows. The `.gitignore` has entries for `test_*.txt` and `test_*.md`, suggesting tests were considered but not implemented.  
   - **Impact:** Every change (including the Windows port just completed) is validated only by manual testing. Regressions are invisible until a user reports them.  
   - **Recommendation:**  
