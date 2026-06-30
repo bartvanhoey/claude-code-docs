@@ -95,7 +95,7 @@
 
 #### 🟡 Medium Priority
 
-- **`install.sh` — piped curl install pattern (`curl | bash`) with no integrity check**  
+- **`install.sh` — piped curl install pattern (`curl | bash`) with no integrity check** ✅ Fixed 2026-06-30  
   The documented install method is `curl -fsSL ... | bash`. There is no checksum verification, no GPG signature, no pinned version. A compromised CDN, a GitHub account takeover, or a MITM on the download URL would silently execute arbitrary code on the user's machine.  
   - **Impact:** Full code execution on install; supply chain risk.  
   - **Recommendation:** Publish SHA256 checksums alongside releases (easy with GitHub Releases). Document a checksum-verified install alternative. Consider signing releases. This is a known tradeoff for convenience-first installers, but it should be documented explicitly as an accepted risk.  

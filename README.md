@@ -185,6 +185,14 @@ See [UNINSTALL.md](UNINSTALL.md) for manual uninstall instructions.
 - The hook only runs `git pull` when reading documentation files
 - All operations are limited to the documentation directory
 - No data is sent externally - everything is local
+- **`curl | bash` install**: The one-liner install method has no checksum verification or signature check. This is a known, accepted tradeoff for convenience. A compromised CDN or GitHub account takeover would execute arbitrary code. If this risk concerns you, use the manual install below.
+- **Manual (safer) install**:
+  ```bash
+  git clone https://github.com/ericbuess/claude-code-docs.git ~/.claude-code-docs
+  cd ~/.claude-code-docs
+  # Review install.sh before running
+  bash install.sh
+  ```
 - **Repository Trust**: The installer clones from GitHub over HTTPS. For additional security, you can:
   - Fork the repository and install from your own fork
   - Clone manually and run the installer from the local directory
