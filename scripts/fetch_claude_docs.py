@@ -137,14 +137,8 @@ def discover_sitemap_and_base_url(session: requests.Session) -> Tuple[str, str]:
             if response.status_code == 200:
                 # Extract base URL from the first URL in sitemap
                 # Parse XML safely to prevent XXE attacks
-                try:
-                    # Try with security parameters (Python 3.8+)
-                    parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
-                    root = ET.fromstring(response.content, parser=parser)
-                except TypeError:
-                    # Fallback for older Python versions
-                    logger.warning("XMLParser security parameters not available, using default parser")
-                    root = ET.fromstring(response.content)
+                parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
+                root = ET.fromstring(response.content, parser=parser)
                 
                 # Try with namespace first
                 namespace = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -185,15 +179,9 @@ def discover_claude_code_pages(session: requests.Session, sitemap_url: str) -> L
         response = session.get(sitemap_url, headers=HEADERS, timeout=30)
         response.raise_for_status()
         
-        # Parse XML sitemap safely
-        try:
-            # Try with security parameters (Python 3.8+)
-            parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
-            root = ET.fromstring(response.content, parser=parser)
-        except TypeError:
-            # Fallback for older Python versions
-            logger.warning("XMLParser security parameters not available, using default parser")
-            root = ET.fromstring(response.content)
+        # Parse XML sitemap safely (Python 3.8+ required — no insecure fallback)
+        parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
+        root = ET.fromstring(response.content, parser=parser)
         
         # Extract all URLs from sitemap
         urls = []
@@ -575,41 +563,41 @@ def main():
                 logger.error(f"Failed to process {page_path}: {e}")
                 failed += 1
                 failed_pages.append(page_path)
-    
-    # Fetch Claude Code changelog
-    logger.info("Fetching Claude Code changelog...")
-    try:
-        filename, content = fetch_changelog(session)
-        
-        # Check if content has changed
-        old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
-        old_entry = manifest.get("files", {}).get(filename, {})
-        
-        if content_has_changed(content, old_hash):
-            content_hash = save_markdown_file(docs_dir, filename, content)
-            logger.info(f"Updated: {filename}")
-            last_updated = datetime.now().isoformat()
-        else:
-            content_hash = old_hash
-            logger.info(f"Unchanged: {filename}")
-            last_updated = old_entry.get("last_updated", datetime.now().isoformat())
-        
-        new_manifest["files"][filename] = {
-            "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
-            "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-            "hash": content_hash,
-            "last_updated": last_updated,
-            "source": "claude-code-repository"
-        }
-        
-        fetched_files.add(filename)
-        successful += 1
-        
-    except Exception as e:
-        logger.error(f"Failed to fetch changelog: {e}")
-        failed += 1
-        failed_pages.append("changelog")
-    
+
+        # Fetch Claude Code changelog
+        logger.info("Fetching Claude Code changelog...")
+        try:
+            filename, content = fetch_changelog(session)
+
+            # Check if content has changed
+            old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
+            old_entry = manifest.get("files", {}).get(filename, {})
+
+            if content_has_changed(content, old_hash):
+                content_hash = save_markdown_file(docs_dir, filename, content)
+                logger.info(f"Updated: {filename}")
+                last_updated = datetime.now().isoformat()
+            else:
+                content_hash = old_hash
+                logger.info(f"Unchanged: {filename}")
+                last_updated = old_entry.get("last_updated", datetime.now().isoformat())
+
+            new_manifest["files"][filename] = {
+                "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+                "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
+                "hash": content_hash,
+                "last_updated": last_updated,
+                "source": "claude-code-repository"
+            }
+
+            fetched_files.add(filename)
+            successful += 1
+
+        except Exception as e:
+            logger.error(f"Failed to fetch changelog: {e}")
+            failed += 1
+            failed_pages.append("changelog")
+
     # Clean up old files (only those we previously fetched)
     cleanup_old_files(docs_dir, fetched_files, manifest)
     

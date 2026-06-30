@@ -1,10 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-# Claude Code Docs Installer v0.3.3 - Changelog integration and compatibility improvements
+# Claude Code Docs Installer - Windows compatibility
 # This script installs/migrates claude-code-docs to ~/.claude-code-docs
 
-echo "Claude Code Docs Installer v0.3.3"
+INSTALLER_VERSION="0.3.4"
+
+echo "Claude Code Docs Installer v$INSTALLER_VERSION"
 echo "==============================="
 
 # Fixed installation location
@@ -20,21 +22,107 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS_TYPE="linux"
     echo "✓ Detected Linux"
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    OS_TYPE="windows"
+    echo "✓ Detected Windows"
 else
     echo "❌ Error: Unsupported OS type: $OSTYPE"
-    echo "This installer supports macOS and Linux only"
+    echo "This installer supports macOS, Linux, and Windows (Git Bash) only"
     exit 1
 fi
 
-# Check dependencies
-echo "Checking dependencies..."
-for cmd in git jq curl; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "❌ Error: $cmd is required but not installed"
-        echo "Please install $cmd and try again"
+# On Windows, ensure jq is available (download if needed).
+# Uses $INSTALL_DIR/bin when it exists; falls back to $HOME/.claude/bin for
+# bootstrap cases (fresh install where $INSTALL_DIR doesn't exist yet).
+ensure_jq_windows() {
+    # Already on PATH?
+    if command -v jq &> /dev/null; then
+        return 0
+    fi
+
+    # Prefer $INSTALL_DIR/bin; fall back to $HOME/.claude/bin on fresh install
+    local bin_dir
+    if [[ -d "$INSTALL_DIR" ]]; then
+        bin_dir="$INSTALL_DIR/bin"
+        # If jq was previously downloaded to the bootstrap location, move it over
+        # rather than downloading again.
+        if [[ ! -f "$bin_dir/jq.exe" && -f "$HOME/.claude/bin/jq.exe" ]]; then
+            mkdir -p "$bin_dir"
+            mv "$HOME/.claude/bin/jq.exe" "$bin_dir/jq.exe"
+        fi
+    else
+        bin_dir="$HOME/.claude/bin"
+    fi
+
+    if [[ -f "$bin_dir/jq.exe" ]]; then
+        export PATH="$bin_dir:$PATH"
+        return 0
+    fi
+
+    echo "  jq not found — downloading for Windows..."
+    mkdir -p "$bin_dir"
+
+    # Detect CPU architecture
+    local arch
+    arch=$(uname -m 2>/dev/null || echo "x86_64")
+    local jq_asset jq_sha256
+    # Pinned to jq 1.8.2 — update version + hashes together when upgrading
+    local jq_version="1.8.2"
+    case "$arch" in
+        aarch64|arm64)
+            jq_asset="jq-windows-arm64.exe"
+            jq_sha256="083b5377392bc57cf27052b6d20a2d927770683bca844632901ff38b4b7b0ac7"
+            ;;
+        *)
+            jq_asset="jq-windows-amd64.exe"
+            jq_sha256="a6fc67fedaf9128a3309a1e2ebb8b986aeccf70122ee46d2cb4849e423f0c627"
+            ;;
+    esac
+
+    local jq_url="https://github.com/jqlang/jq/releases/download/jq-${jq_version}/$jq_asset"
+    if curl -fsSL "$jq_url" -o "$bin_dir/jq.exe"; then
+        # Verify SHA256 checksum
+        local actual_sha256
+        actual_sha256=$(sha256sum "$bin_dir/jq.exe" 2>/dev/null | cut -d' ' -f1 || \
+                        CertUtil -hashfile "$bin_dir/jq.exe" SHA256 2>/dev/null | sed -n '2p' | tr -d ' ')
+        if [[ "$actual_sha256" != "$jq_sha256" ]]; then
+            echo "❌ Error: jq checksum mismatch — download may be corrupt or tampered."
+            echo "  Expected: $jq_sha256"
+            echo "  Got:      $actual_sha256"
+            rm -f "$bin_dir/jq.exe"
+            exit 1
+        fi
+        chmod +x "$bin_dir/jq.exe"
+        export PATH="$bin_dir:$PATH"
+        echo "  ✓ jq downloaded and verified ($jq_asset v$jq_version)"
+    else
+        echo "❌ Error: Could not download jq. Please install jq manually and try again."
         exit 1
     fi
-done
+}
+
+# Check dependencies
+echo "Checking dependencies..."
+if [[ "$OS_TYPE" == "windows" ]]; then
+    for cmd in git curl; do
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "❌ Error: $cmd is required but not installed"
+            echo "Please install $cmd and try again"
+            exit 1
+        fi
+    done
+    # jq is not bundled with Git for Windows — download it now so all subsequent
+    # jq calls (including find_existing_installations) work correctly.
+    ensure_jq_windows
+else
+    for cmd in git jq curl; do
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "❌ Error: $cmd is required but not installed"
+            echo "Please install $cmd and try again"
+            exit 1
+        fi
+    done
+fi
 echo "✓ All dependencies satisfied"
 
 
@@ -50,55 +138,59 @@ find_existing_installations() {
         while IFS= read -r line; do
             # v0.1 format
             if [[ "$line" =~ LOCAL\ DOCS\ AT:\ ([^[:space:]]+)/docs/ ]]; then
-                local path="${BASH_REMATCH[1]}"
-                path="${path/#\~/$HOME}"
-                [[ -d "$path" ]] && paths+=("$path")
+                local v01_path="${BASH_REMATCH[1]}"
+                v01_path="${v01_path/#\~/$HOME}"
+                [[ -d "$v01_path" ]] && paths+=("$v01_path")
             fi
             # v0.2+ format
             if [[ "$line" =~ Execute:.*claude-code-docs ]]; then
                 # Extract path from various formats
-                local path=$(echo "$line" | grep -o '[^ "]*claude-code-docs[^ "]*' | head -1)
-                path="${path/#\~/$HOME}"
-                
+                local cmd_path
+                cmd_path=$(echo "$line" | grep -o '[^ "]*claude-code-docs[^ "]*' | head -1)
+                cmd_path="${cmd_path/#\~/$HOME}"
+
                 # Get directory part
-                if [[ -d "$path" ]]; then
-                    paths+=("$path")
-                elif [[ -d "$(dirname "$path")" ]] && [[ "$(basename "$(dirname "$path")")" == "claude-code-docs" ]]; then
-                    paths+=("$(dirname "$path")")
+                if [[ -d "$cmd_path" ]]; then
+                    paths+=("$cmd_path")
+                elif [[ -d "$(dirname "$cmd_path")" ]] && [[ "$(basename "$(dirname "$cmd_path")")" == "claude-code-docs" ]]; then
+                    paths+=("$(dirname "$cmd_path")")
                 fi
             fi
         done < ~/.claude/commands/docs.md
     fi
-    
+
     # Check settings.json hooks for paths
     if [[ -f ~/.claude/settings.json ]]; then
-        local hooks=$(jq -r '.hooks.PreToolUse[]?.hooks[]?.command // empty' ~/.claude/settings.json 2>/dev/null)
+        local hooks
+        hooks=$(jq -r '.hooks.PreToolUse[]?.hooks[]?.command // empty' ~/.claude/settings.json 2>/dev/null)
         while IFS= read -r cmd; do
             if [[ "$cmd" =~ claude-code-docs ]]; then
                 # Extract paths from v0.1 complex hook format
                 # Look for patterns like: "/path/to/claude-code-docs/.last_check"
-                local v01_paths=$(echo "$cmd" | grep -o '"[^"]*claude-code-docs[^"]*"' | sed 's/"//g' || true)
-                while IFS= read -r path; do
-                    [[ -z "$path" ]] && continue
+                local v01_hook_paths
+                v01_hook_paths=$(echo "$cmd" | grep -o '"[^"]*claude-code-docs[^"]*"' | sed 's/"//g' || true)
+                while IFS= read -r hook_path; do
+                    [[ -z "$hook_path" ]] && continue
                     # Extract just the directory part
-                    if [[ "$path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
-                        path="${BASH_REMATCH[1]}"
-                        path="${path/#\~/$HOME}"
-                        [[ -d "$path" ]] && paths+=("$path")
+                    if [[ "$hook_path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
+                        hook_path="${BASH_REMATCH[1]}"
+                        hook_path="${hook_path/#\~/$HOME}"
+                        [[ -d "$hook_path" ]] && paths+=("$hook_path")
                     fi
-                done <<< "$v01_paths"
-                
+                done <<< "$v01_hook_paths"
+
                 # Also try v0.2+ simpler format
-                local found=$(echo "$cmd" | grep -o '[^ "]*claude-code-docs[^ "]*' || true)
-                while IFS= read -r path; do
-                    [[ -z "$path" ]] && continue
-                    path="${path/#\~/$HOME}"
+                local found_paths
+                found_paths=$(echo "$cmd" | grep -o '[^ "]*claude-code-docs[^ "]*' || true)
+                while IFS= read -r found_path; do
+                    [[ -z "$found_path" ]] && continue
+                    found_path="${found_path/#\~/$HOME}"
                     # Clean up path to get the claude-code-docs directory
-                    if [[ "$path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
-                        path="${BASH_REMATCH[1]}"
+                    if [[ "$found_path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
+                        found_path="${BASH_REMATCH[1]}"
                     fi
-                    [[ -d "$path" ]] && paths+=("$path")
-                done <<< "$found"
+                    [[ -d "$found_path" ]] && paths+=("$found_path")
+                done <<< "$found_paths"
             fi
         done <<< "$hooks"
     fi
@@ -156,8 +248,8 @@ migrate_installation() {
 # Function to safely update git repository
 safe_git_update() {
     local repo_dir="$1"
-    cd "$repo_dir"
-    
+    pushd "$repo_dir" >/dev/null
+
     # Get current branch
     local current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
     
@@ -184,6 +276,7 @@ safe_git_update() {
     
     # Try regular pull first (use target branch)
     if git pull --quiet origin "$target_branch" 2>/dev/null; then
+        popd >/dev/null
         return 0
     fi
     
@@ -193,6 +286,7 @@ safe_git_update() {
     # Fetch latest
     if ! git fetch origin "$target_branch" 2>/dev/null; then
         echo "  ⚠️  Could not fetch from GitHub (offline?)"
+        popd >/dev/null
         return 1
     fi
     
@@ -252,6 +346,7 @@ safe_git_update() {
             echo "To proceed later, either:"
             echo "  1. Manually resolve the issues, or"
             echo "  2. Run the installer again and choose 'y' to discard changes"
+            popd >/dev/null
             return 1
         fi
         echo "  Proceeding with clean installation..."
@@ -292,7 +387,8 @@ safe_git_update() {
     git clean -fd >/dev/null 2>&1 || true
     
     echo "  ✓ Updated successfully to clean state"
-    
+
+    popd >/dev/null
     return 0
 }
 
@@ -381,7 +477,12 @@ fi
 
 # Now we're in $INSTALL_DIR, set up the new script-based system
 echo ""
-echo "Setting up Claude Code Docs v0.3.3..."
+echo "Setting up Claude Code Docs v$INSTALLER_VERSION..."
+
+# On Windows, ensure jq is still on PATH after cd into INSTALL_DIR
+if [[ "$OS_TYPE" == "windows" ]]; then
+    ensure_jq_windows
+fi
 
 # Copy helper script from template
 echo "Installing helper script..."
@@ -411,45 +512,19 @@ if [[ -f ~/.claude/commands/docs.md ]]; then
     echo "  Updating existing command..."
 fi
 
-# Create simplified docs command
-cat > ~/.claude/commands/docs.md << 'EOF'
-Execute the Claude Code Docs helper script at ~/.claude-code-docs/claude-docs-helper.sh
-
-Usage:
-- /docs - List all available documentation topics
-- /docs <topic> - Read specific documentation with link to official docs
-- /docs -t - Check sync status without reading a doc
-- /docs -t <topic> - Check freshness then read documentation
-- /docs whats new - Show recent documentation changes (or "what's new")
-
-Examples of expected output:
-
-When reading a doc:
-📚 COMMUNITY MIRROR: https://github.com/ericbuess/claude-code-docs
-📖 OFFICIAL DOCS: https://docs.anthropic.com/en/docs/claude-code
-
-[Doc content here...]
-
-📖 Official page: https://docs.anthropic.com/en/docs/claude-code/hooks
-
-When showing what's new:
-📚 Recent documentation updates:
-
-• 5 hours ago:
-  📎 https://github.com/ericbuess/claude-code-docs/commit/eacd8e1
-  📄 data-usage: https://docs.anthropic.com/en/docs/claude-code/data-usage
-     ➕ Added: Privacy safeguards
-  📄 security: https://docs.anthropic.com/en/docs/claude-code/security
-     ✨ Data flow and dependencies section moved here
-
-📎 Full changelog: https://github.com/ericbuess/claude-code-docs/commits/main/docs
-📚 COMMUNITY MIRROR - NOT AFFILIATED WITH ANTHROPIC
-
-Every request checks for the latest documentation from GitHub (takes ~0.4s).
-The helper script handles all functionality including auto-updates.
-
-Execute: ~/.claude-code-docs/claude-docs-helper.sh "$ARGUMENTS"
-EOF
+# Copy docs command from template
+if [[ -f "$INSTALL_DIR/scripts/docs-command.md.template" ]]; then
+    cp "$INSTALL_DIR/scripts/docs-command.md.template" ~/.claude/commands/docs.md
+else
+    echo "  ⚠️  docs-command.md.template missing, attempting recovery..."
+    if curl -fsSL "https://raw.githubusercontent.com/ericbuess/claude-code-docs/$INSTALL_BRANCH/scripts/docs-command.md.template" -o ~/.claude/commands/docs.md 2>/dev/null; then
+        echo "  ✓ docs command downloaded directly"
+    else
+        echo "  ❌ Failed to install /docs command"
+        echo "  Please check your installation and try again"
+        exit 1
+    fi
+fi
 
 echo "✓ Created /docs command"
 
@@ -457,7 +532,7 @@ echo "✓ Created /docs command"
 echo "Setting up automatic updates..."
 
 # Simple hook that just calls the helper script
-HOOK_COMMAND="~/.claude-code-docs/claude-docs-helper.sh hook-check"
+HOOK_COMMAND="$HOME/.claude-code-docs/claude-docs-helper.sh hook-check"
 
 if [ -f ~/.claude/settings.json ]; then
     # Update existing settings.json
@@ -499,7 +574,7 @@ cleanup_old_installations
 
 # Success message
 echo ""
-echo "✅ Claude Code Docs v0.3.3 installed successfully!"
+echo "✅ Claude Code Docs v$INSTALLER_VERSION installed successfully!"
 echo ""
 echo "📚 Command: /docs (user)"
 echo "📂 Location: ~/.claude-code-docs"
@@ -512,6 +587,6 @@ echo ""
 echo "🔄 Auto-updates: Enabled - syncs automatically when GitHub has newer content"
 echo ""
 echo "Available topics:"
-ls "$INSTALL_DIR/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 60
+ls "$INSTALL_DIR/docs" | grep '\.md$' | sed 's/\.md$//' | sort
 echo ""
 echo "⚠️  Note: Restart Claude Code for auto-updates to take effect"

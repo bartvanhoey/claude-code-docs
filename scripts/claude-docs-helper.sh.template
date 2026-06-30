@@ -1,12 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-# Claude Code Documentation Helper Script v0.3.3
+# Claude Code Documentation Helper Script v0.3.4
 # This script handles all /docs command functionality  
 # Installation path: ~/.claude-code-docs/claude-docs-helper.sh
 
 # Script version
-SCRIPT_VERSION="0.3.3"
+SCRIPT_VERSION="0.3.4"
 
 # Fixed installation path (no need for placeholder replacement)
 DOCS_PATH="$HOME/.claude-code-docs"
@@ -14,11 +14,17 @@ MANIFEST="$DOCS_PATH/docs/docs_manifest.json"
 
 # No colors since they don't work in terminal anyway
 
-# Enhanced sanitize function to prevent command injection
+# Sanitize a doc topic argument against path traversal.
+# Allows alphanumeric, spaces, hyphens, underscores, periods, commas, apostrophes,
+# and question marks — enough for all real topic names and natural-language queries.
+# Strips .. components and leading slashes so the result can never escape DOCS_PATH/docs.
 sanitize_input() {
-    # Remove ALL shell metacharacters and control characters
-    # Only allow alphanumeric, spaces, hyphens, underscores, periods, commas, apostrophes, and question marks
-    echo "$1" | sed 's/[^a-zA-Z0-9 _.,'\''?-]//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//'
+    local input="$1"
+    # Remove .. path traversal sequences and leading slashes
+    input="${input//../}"
+    input="${input#/}"
+    # Strip remaining shell metacharacters; keep characters valid in topic names / NL queries
+    echo "$input" | sed 's/[^a-zA-Z0-9 _.,'\''?/-]//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//'
 }
 
 # Function to print documentation header
@@ -57,17 +63,8 @@ auto_update() {
         # We're behind - safe to pull
         echo "🔄 Updating documentation..." >&2
         git pull --quiet origin "$BRANCH" 2>&1 | grep -v "Merge made by" || true
-        
-        # Check if installer needs updating
-        local INSTALLER_VERSION=$SCRIPT_VERSION
-        local VERSION_INT=$(echo "$INSTALLER_VERSION" | sed 's/^0\.//' | cut -d. -f1)
-
-        if [[ $VERSION_INT -ge 3 ]]; then
-            echo "🔧 Updating Claude Code Docs installer..." >&2
-            ./install.sh >/dev/null 2>&1
-        fi
     fi
-    
+
     return 0  # Success (either updated or already up-to-date)
 }
 
@@ -121,11 +118,20 @@ show_freshness() {
 # Function to read documentation
 read_doc() {
     local topic=$(sanitize_input "$1")
-    
+
     # Strip .md extension if user included it (they're being helpful!)
     topic="${topic%.md}"
-    
+
     local doc_path="$DOCS_PATH/docs/${topic}.md"
+
+    # Containment check: resolved path must stay inside $DOCS_PATH/docs
+    local real_docs_dir real_doc_path
+    real_docs_dir=$(realpath "$DOCS_PATH/docs" 2>/dev/null || echo "$DOCS_PATH/docs")
+    real_doc_path=$(realpath "$doc_path" 2>/dev/null || echo "$doc_path")
+    if [[ "$real_doc_path" != "$real_docs_dir"/* ]]; then
+        echo "❌ Invalid topic: path escapes docs directory."
+        exit 1
+    fi
     
     if [[ -f "$doc_path" ]]; then
         print_doc_header
@@ -159,14 +165,6 @@ read_doc() {
             # We're behind - safe to update
             echo "🔄 Updating to latest documentation..."
             git pull --quiet origin "$COMPARE_BRANCH" 2>&1 | grep -v "Merge made by" || true
-            
-            # Check if installer needs updating
-            local INSTALLER_VERSION=$SCRIPT_VERSION
-            local VERSION_INT=$(echo "$INSTALLER_VERSION" | sed 's/^0\.//' | cut -d. -f1)
-
-            if [[ $VERSION_INT -ge 3 ]]; then
-                ./install.sh >/dev/null 2>&1
-            fi
             echo "✅ Updated to latest (v$VERSION, $BRANCH)"
         else
             local AHEAD=$(git rev-list origin/"$COMPARE_BRANCH"..HEAD --count 2>/dev/null || echo "0")
@@ -201,16 +199,16 @@ read_doc() {
             
             if [[ -n "$matches" ]]; then
                 echo "Found these related topics:"
-                echo "$matches" | sed 's/^/  • /' 
+                echo "$matches" | sed 's/^/  • /'
                 echo ""
                 echo "Try: /docs <topic> to read a specific document"
             else
                 echo "No exact matches found. Here are all available topics:"
-                ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 80
+                ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort
             fi
         else
             echo "Available topics:"
-            ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 80
+            ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort
         fi
         echo ""
         echo "💡 Tip: Use grep to search across all docs: cd ~/.claude-code-docs && grep -r 'search term' docs/"
@@ -226,7 +224,7 @@ list_docs() {
     
     echo "Available documentation topics:"
     echo ""
-    ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort | column -c 80
+    ls "$DOCS_PATH/docs" | grep '\.md$' | sed 's/\.md$//' | sort
     echo ""
     echo "Usage: /docs <topic> or /docs -t to check freshness"
 }
@@ -241,9 +239,6 @@ hook_check() {
 
 # Function to show what's new (simplified version)
 whats_new() {
-    # Temporarily disable strict error handling for this function
-    set +e
-    
     print_doc_header
     
     # Auto-update first (synchronous - we need latest git history)
@@ -276,22 +271,16 @@ whats_new() {
             done
         fi
         echo ""
-        ((count++))
+        count=$((count + 1))
     done < <(git log --oneline -10 -- docs/*.md 2>/dev/null | grep -v "Merge" || true)
-    
+
     if [[ $count -eq 0 ]]; then
         echo "No recent documentation updates found."
         echo ""
     fi
-    
+
     echo "📎 Full changelog: https://github.com/ericbuess/claude-code-docs/commits/main/docs"
     echo "📚 COMMUNITY MIRROR - NOT AFFILIATED WITH ANTHROPIC"
-    
-    # Re-enable strict error handling
-    set -e
-    
-    # Ensure we always exit successfully
-    return 0
 }
 
 # Function for uninstall
@@ -312,7 +301,7 @@ uninstall() {
     echo "  ~/.claude-code-docs/uninstall.sh"
     echo ""
     echo "Or to skip confirmation:"
-    echo "  echo 'y' | ~/.claude-code-docs/uninstall.sh"
+    echo "  ~/.claude-code-docs/uninstall.sh --yes"
     echo ""
 }
 
