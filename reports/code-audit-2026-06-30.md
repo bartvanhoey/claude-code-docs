@@ -126,7 +126,7 @@
 
 #### 🟡 Medium Priority
 
-- **`scripts/claude-docs-helper.sh.template:134–178` — every `read_doc` call does a `git fetch`**  
+- **`scripts/claude-docs-helper.sh.template:134–178` — every `read_doc` call does a `git fetch`** ⏭ Won't fix  
   `read_doc` performs a full `git fetch origin $BRANCH` synchronously on every single doc read. Even with `--quiet`, a network round-trip (avg ~0.37s per the script's own comment) blocks every `/docs` invocation. The `hook_check` function (used by the PreToolUse hook) does nothing (`exit 0`), while `read_doc` does the expensive fetch.  
   - **Impact:** Every doc read adds ~400ms of network latency. On a slow connection or offline, it adds a timeout wait.  
   - **Recommendation:** Move freshness checking to `hook_check` (which runs in the background as a PreToolUse hook) and have `read_doc` just read from disk. The hook fires before the Read tool — it's the right place for async prefetch. Cache the fetch result in a `.last_check` file with a TTL (e.g. 10 min).  
