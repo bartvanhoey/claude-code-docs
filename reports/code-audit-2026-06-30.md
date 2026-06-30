@@ -168,7 +168,7 @@
   - **Recommendation:** Define `INSTALLER_VERSION` once at the top of `install.sh` and reference it via `$INSTALLER_VERSION` in all echo statements. Add a CI check that `SCRIPT_VERSION` in the template matches `INSTALLER_VERSION` in `install.sh`.  
   - **Effort:** 30 min
 
-- **`install.sh:466–504` — docs.md command file generated via heredoc with hardcoded content**  
+- **`install.sh:466–504` — docs.md command file generated via heredoc with hardcoded content** ✅ Fixed 2026-06-30  
   The `/docs` command's content (usage examples, expected output, etc.) is embedded as a heredoc in `install.sh`. When the command format changes, both the template and the embedded content must be updated together — there's no single source of truth.  
   - **Recommendation:** Store the command file template as `scripts/docs-command.md.template` (similar to how the helper script template is handled), and have `install.sh` copy it.  
   - **Effort:** 30 min
