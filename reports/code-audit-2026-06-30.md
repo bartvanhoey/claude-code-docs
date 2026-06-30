@@ -173,7 +173,7 @@
   - **Recommendation:** Store the command file template as `scripts/docs-command.md.template` (similar to how the helper script template is handled), and have `install.sh` copy it.  
   - **Effort:** 30 min
 
-- **`.github/workflows/update-docs.yml` — no timeout on the fetch job**  
+- **`.github/workflows/update-docs.yml` — no timeout on the fetch job** ✅ Fixed 2026-06-30  
   The `fetch_claude_docs.py` step has no `timeout-minutes` set. A hung HTTP request could hold a GitHub Actions runner indefinitely, burning minutes quota.  
   - **Recommendation:** Add `timeout-minutes: 15` to the `fetch-docs` step.  
   - **Effort:** 2 min

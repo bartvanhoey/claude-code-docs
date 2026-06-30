@@ -33,6 +33,7 @@ jobs:
     
     - name: Fetch latest documentation
       id: fetch-docs
+      timeout-minutes: 15
       env:
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
