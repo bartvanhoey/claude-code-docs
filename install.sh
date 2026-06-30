@@ -63,17 +63,36 @@ ensure_jq_windows() {
     # Detect CPU architecture
     local arch
     arch=$(uname -m 2>/dev/null || echo "x86_64")
-    local jq_asset
+    local jq_asset jq_sha256
+    # Pinned to jq 1.8.2 — update version + hashes together when upgrading
+    local jq_version="1.8.2"
     case "$arch" in
-        aarch64|arm64) jq_asset="jq-windows-arm64.exe" ;;
-        *)             jq_asset="jq-windows-amd64.exe" ;;
+        aarch64|arm64)
+            jq_asset="jq-windows-arm64.exe"
+            jq_sha256="083b5377392bc57cf27052b6d20a2d927770683bca844632901ff38b4b7b0ac7"
+            ;;
+        *)
+            jq_asset="jq-windows-amd64.exe"
+            jq_sha256="a6fc67fedaf9128a3309a1e2ebb8b986aeccf70122ee46d2cb4849e423f0c627"
+            ;;
     esac
 
-    local jq_url="https://github.com/jqlang/jq/releases/latest/download/$jq_asset"
+    local jq_url="https://github.com/jqlang/jq/releases/download/jq-${jq_version}/$jq_asset"
     if curl -fsSL "$jq_url" -o "$bin_dir/jq.exe"; then
+        # Verify SHA256 checksum
+        local actual_sha256
+        actual_sha256=$(sha256sum "$bin_dir/jq.exe" 2>/dev/null | cut -d' ' -f1 || \
+                        CertUtil -hashfile "$bin_dir/jq.exe" SHA256 2>/dev/null | sed -n '2p' | tr -d ' ')
+        if [[ "$actual_sha256" != "$jq_sha256" ]]; then
+            echo "❌ Error: jq checksum mismatch — download may be corrupt or tampered."
+            echo "  Expected: $jq_sha256"
+            echo "  Got:      $actual_sha256"
+            rm -f "$bin_dir/jq.exe"
+            exit 1
+        fi
         chmod +x "$bin_dir/jq.exe"
         export PATH="$bin_dir:$PATH"
-        echo "  ✓ jq downloaded ($jq_asset)"
+        echo "  ✓ jq downloaded and verified ($jq_asset v$jq_version)"
     else
         echo "❌ Error: Could not download jq. Please install jq manually and try again."
         exit 1

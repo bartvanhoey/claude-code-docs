@@ -101,7 +101,7 @@
   - **Recommendation:** Publish SHA256 checksums alongside releases (easy with GitHub Releases). Document a checksum-verified install alternative. Consider signing releases. This is a known tradeoff for convenience-first installers, but it should be documented explicitly as an accepted risk.  
   - **Effort:** 2 hours to add checksums; ongoing per release
 
-- **`install.sh:67` — jq downloaded from `releases/latest` without integrity check**  
+- **`install.sh:67` — jq downloaded from `releases/latest` without integrity check** ✅ Fixed 2026-06-30  
   The Windows jq bootstrap downloads `jq-windows-{arch}.exe` from `https://github.com/jqlang/jq/releases/latest/download/...` using `curl -fsSL` with no hash verification. This is then executed as part of the installation process.  
   - **Impact:** If jqlang's release is compromised or the URL redirected, the downloaded binary runs with user privileges.  
   - **Recommendation:** Pin to a specific jq release version (e.g. `1.7.1`) and verify its SHA256 after download. The version can be a constant at the top of the script for easy maintenance.  
