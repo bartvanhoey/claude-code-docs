@@ -6,7 +6,7 @@
 
 [![Documentation Update](https://img.shields.io/github/actions/workflow/status/bartvanhoey/claude-code-docs/update-docs.yml?label=Documentation%20Update)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/update-docs.yml)
 
-[![Dependabot Updates](https://img.shields.io/github/actions/workflow/status/bartvanhoey/claude-code-docs/dependabot.yml?label=Dependabot%20Updates)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot.yml)
+[![Dependabot Updates](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates)
   
 A local, auto-updating mirror of the [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code/), exposed to Claude as a `/docs` slash command. No more fetching from the web — docs sync from GitHub every 3 hours and Claude reads them straight off disk.
 
