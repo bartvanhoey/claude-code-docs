@@ -1,11 +1,13 @@
 # Claude Code Documentation Mirror
 
 [![Last Update](https://img.shields.io/github/last-commit/bartvanhoey/claude-code-docs/main.svg?label=docs%20updated)](https://github.com/bartvanhoey/claude-code-docs/commits/main)
-[![Platform](https://img.shields.io/badge/platform-Windows-blue)](https://github.com/bartvanhoey/claude-code-docs)
-[![Documentation Update](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/update-docs.yml/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/update-docs.yml)
-[![Dependabot Updates](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates)
-[![Create Release](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/release.yml/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/release.yml)
 
+[![Platform](https://img.shields.io/badge/platform-Windows-blue)](https://github.com/bartvanhoey/claude-code-docs)
+
+[![Documentation Update](https://img.shields.io/github/actions/workflow/status/bartvanhoey/claude-code-docs/update-docs.yml?label=Documentation%20Update)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/update-docs.yml)
+
+[![Dependabot Updates](https://img.shields.io/github/actions/workflow/status/bartvanhoey/claude-code-docs/dependabot.yml?label=Dependabot%20Updates)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot.yml)
+  
 A local, auto-updating mirror of the [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code/), exposed to Claude as a `/docs` slash command. No more fetching from the web — docs sync from GitHub every 3 hours and Claude reads them straight off disk.
 
 **Windows only** — this is a fork of [claude-code-docs](https://github.com/ericbuess/claude-code-docs) by [@EricBuess](https://github.com/EricBuess), rebuilt specifically for Windows/Git Bash. macOS/Linux support from the original has been removed; use the upstream repo on those platforms.
