@@ -16,18 +16,12 @@ INSTALL_DIR="$HOME/.claude-code-docs"
 INSTALL_BRANCH="main"
 
 # Detect OS type
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    OS_TYPE="macos"
-    echo "✓ Detected macOS"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    OS_TYPE="linux"
-    echo "✓ Detected Linux"
-elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     OS_TYPE="windows"
     echo "✓ Detected Windows"
 else
     echo "❌ Error: Unsupported OS type: $OSTYPE"
-    echo "This installer supports macOS, Linux, and Windows (Git Bash) only"
+    echo "This installer supports Windows (Git Bash) only"
     exit 1
 fi
 
