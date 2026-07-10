@@ -123,10 +123,24 @@ def url_to_safe_filename(url_path: str) -> str:
     return safe_name
 
 
+def parse_sitemap_xml(content: bytes) -> ET.Element:
+    """
+    Parse sitemap XML robustly.
+
+    Some Python 3.11 point releases raise
+    "XMLParser() takes at most 2 keyword arguments (3 given)" from
+    ET.fromstring() due to a stdlib regression in how the default parser is
+    constructed. Building the parser explicitly with no extra kwargs avoids
+    tripping that code path.
+    """
+    parser = ET.XMLParser()
+    return ET.fromstring(content, parser=parser)
+
+
 def discover_sitemap_and_base_url(session: requests.Session) -> Tuple[str, str]:
     """
     Discover the sitemap URL and extract the base URL from it.
-    
+
     Returns:
         Tuple of (sitemap_url, base_url)
     """
@@ -136,9 +150,7 @@ def discover_sitemap_and_base_url(session: requests.Session) -> Tuple[str, str]:
             response = session.get(sitemap_url, headers=HEADERS, timeout=30)
             if response.status_code == 200:
                 # Extract base URL from the first URL in sitemap
-                # Parse XML — ET.XMLParser doesn't support forbid_* kwargs (those are defusedxml).
-                # We rely on Python's built-in ET which is safe enough for trusted sitemap URLs.
-                root = ET.fromstring(response.content)
+                root = parse_sitemap_xml(response.content)
                 
                 # Try with namespace first
                 namespace = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -179,8 +191,8 @@ def discover_claude_code_pages(session: requests.Session, sitemap_url: str) -> L
         response = session.get(sitemap_url, headers=HEADERS, timeout=30)
         response.raise_for_status()
         
-        # Parse XML sitemap — see note in discover_sitemap_and_base_url about ET.XMLParser.
-        root = ET.fromstring(response.content)
+        # Parse XML sitemap
+        root = parse_sitemap_xml(response.content)
         
         # Extract all URLs from sitemap
         urls = []
@@ -245,23 +257,23 @@ def discover_claude_code_pages(session: requests.Session, sitemap_url: str) -> L
         logger.error(f"Failed to discover pages from sitemap: {e}")
         logger.warning("Falling back to essential pages...")
 
-        # Fallback list using legacy docs.anthropic.com path structure.
+        # Fallback list using the current code.claude.com path structure.
         return [
-            "/en/docs/claude-code/overview",
-            "/en/docs/claude-code/setup",
-            "/en/docs/claude-code/quickstart",
-            "/en/docs/claude-code/memory",
-            "/en/docs/claude-code/common-workflows",
-            "/en/docs/claude-code/ide-integrations",
-            "/en/docs/claude-code/mcp",
-            "/en/docs/claude-code/github-actions",
-            "/en/docs/claude-code/sdk",
-            "/en/docs/claude-code/troubleshooting",
-            "/en/docs/claude-code/security",
-            "/en/docs/claude-code/settings",
-            "/en/docs/claude-code/hooks",
-            "/en/docs/claude-code/costs",
-            "/en/docs/claude-code/monitoring-usage",
+            "/docs/en/overview",
+            "/docs/en/setup",
+            "/docs/en/quickstart",
+            "/docs/en/memory",
+            "/docs/en/common-workflows",
+            "/docs/en/ide-integrations",
+            "/docs/en/mcp",
+            "/docs/en/github-actions",
+            "/docs/en/sdk",
+            "/docs/en/troubleshooting",
+            "/docs/en/security",
+            "/docs/en/settings",
+            "/docs/en/hooks",
+            "/docs/en/costs",
+            "/docs/en/monitoring-usage",
         ]
 
 
@@ -490,7 +502,7 @@ def main():
         except Exception as e:
             logger.error(f"Failed to discover sitemap: {e}")
             logger.info("Using fallback configuration...")
-            base_url = "https://docs.anthropic.com"
+            base_url = "https://code.claude.com"
             sitemap_url = None
 
         # Discover documentation pages dynamically
@@ -498,23 +510,23 @@ def main():
             documentation_pages = discover_claude_code_pages(session, sitemap_url)
         else:
             # Fallback when sitemap discovery fails.
-            # These use the legacy docs.anthropic.com path structure so they match base_url above.
+            # These use the current code.claude.com path structure so they match base_url above.
             documentation_pages = [
-                "/en/docs/claude-code/overview",
-                "/en/docs/claude-code/setup",
-                "/en/docs/claude-code/quickstart",
-                "/en/docs/claude-code/memory",
-                "/en/docs/claude-code/common-workflows",
-                "/en/docs/claude-code/ide-integrations",
-                "/en/docs/claude-code/mcp",
-                "/en/docs/claude-code/github-actions",
-                "/en/docs/claude-code/sdk",
-                "/en/docs/claude-code/troubleshooting",
-                "/en/docs/claude-code/security",
-                "/en/docs/claude-code/settings",
-                "/en/docs/claude-code/hooks",
-                "/en/docs/claude-code/costs",
-                "/en/docs/claude-code/monitoring-usage",
+                "/docs/en/overview",
+                "/docs/en/setup",
+                "/docs/en/quickstart",
+                "/docs/en/memory",
+                "/docs/en/common-workflows",
+                "/docs/en/ide-integrations",
+                "/docs/en/mcp",
+                "/docs/en/github-actions",
+                "/docs/en/sdk",
+                "/docs/en/troubleshooting",
+                "/docs/en/security",
+                "/docs/en/settings",
+                "/docs/en/hooks",
+                "/docs/en/costs",
+                "/docs/en/monitoring-usage",
             ]
         
         if not documentation_pages:
@@ -628,9 +640,12 @@ def main():
         logger.warning("\nFailed pages (will retry next run):")
         for page in failed_pages:
             logger.warning(f"  - {page}")
-        # Don't exit with error - partial success is OK
-        if successful == 0:
-            logger.error("No pages were fetched successfully!")
+        # Fail the run whenever any real documentation page failed to fetch,
+        # not just when every single fetch (including the unrelated changelog
+        # fetch) failed — otherwise a lone changelog success silently masks a
+        # total documentation fetch failure.
+        if failed > 0:
+            logger.error(f"{failed} documentation page(s) failed to fetch!")
             sys.exit(1)
     else:
         logger.info("\nAll pages fetched successfully!")
