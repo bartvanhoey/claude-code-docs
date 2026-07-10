@@ -1,240 +1,82 @@
 # Claude Code Documentation Mirror
 
-[![Last Update](https://img.shields.io/github/last-commit/ericbuess/claude-code-docs/main.svg?label=docs%20updated)](https://github.com/ericbuess/claude-code-docs/commits/main)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)]()
-[![Beta](https://img.shields.io/badge/status-early%20beta-orange)](https://github.com/ericbuess/claude-code-docs/issues)
+[![Last Update](https://img.shields.io/github/last-commit/bartvanhoey/claude-code-docs/main.svg?label=docs%20updated)](https://github.com/bartvanhoey/claude-code-docs/commits/main)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue)](https://github.com/bartvanhoey/claude-code-docs)
+[![Dependabot Updates](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates)
+[![Create Release](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/release.yml/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/release.yml)
 
-Local mirror of Claude Code documentation files from https://docs.anthropic.com/en/docs/claude-code/, updated every 3 hours.
+A local, auto-updating mirror of the [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code/), exposed to Claude as a `/docs` slash command. No more fetching from the web — docs sync from GitHub every 3 hours and Claude reads them straight off disk.
 
-## ⚠️ Early Beta Notice
+**Windows only** — this is a fork of [claude-code-docs](https://github.com/ericbuess/claude-code-docs) by [@EricBuess](https://github.com/EricBuess), rebuilt specifically for Windows/Git Bash. macOS/Linux support from the original has been removed; use the upstream repo on those platforms.
 
-**This is an early beta release**. There may be errors or unexpected behavior. If you encounter any issues, please [open an issue](https://github.com/ericbuess/claude-code-docs/issues) - your feedback helps improve the tool!
+## Why
 
-## 🆕 Version 0.3.4 - Windows Support
+- **Fast** — reads local files instead of hitting the web
+- **Fresh** — GitHub Actions syncs docs every 3 hours
+- **Searchable** — ask natural-language questions across all docs
+- **Changelog access** — `/docs changelog` pulls official release notes
 
-**New in this version:**
-- 🪟 **Windows support**: Run the installer from Git Bash — `jq` is downloaded automatically (arch-detected: amd64 or arm64), no manual setup required
-- 🔧 **Improved path handling**: `$HOME` used instead of `~` in generated configs for better cross-platform compatibility
-
-To update:
-```bash
-curl -fsSL https://raw.githubusercontent.com/ericbuess/claude-code-docs/main/install.sh | bash
-```
-
-## Why This Exists
-
-- **Faster access** - Reads from local files instead of fetching from web
-- **Automatic updates** - Attempts to stay current with the latest documentation
-- **Track changes** - See what changed in docs over time
-- **Claude Code changelog** - Quick access to official release notes and version history
-- **Better Claude Code integration** - Allows Claude to explore documentation more effectively
-
-## Platform Compatibility
-
-- ✅ **macOS**: Fully supported (tested on macOS 12+)
-- ✅ **Linux**: Fully supported (Ubuntu, Debian, Fedora, etc.)
-- ✅ **Windows**: Supported via Git Bash — `jq` is downloaded automatically, no extra setup needed
-
-### Prerequisites
-
-This tool requires the following to be installed:
-- **git** - For cloning and updating the repository (usually pre-installed; on Windows: [Git for Windows](https://git-scm.com/download/win))
-- **jq** - For JSON processing (pre-installed on macOS; Linux: `apt install jq` or `yum install jq`; **Windows: downloaded automatically by the installer**)
-- **curl** - For downloading (usually pre-installed; included with Git for Windows)
-- **Claude Code** - Obviously :)
-
-## Installation
-
-Run this single command:
+## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ericbuess/claude-code-docs/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/install.sh | bash
 ```
 
-This will:
-1. Install to `~/.claude-code-docs` (or migrate existing installation)
-2. Create the `/docs` slash command to pass arguments to the tool and tell it where to find the docs
-3. Set up a 'PreToolUse' 'Read' hook to enable automatic git pull when reading docs from the ~/.claude-code-docs`
+Requires Windows with [Git for Windows](https://git-scm.com/download/win) (provides Git Bash, `git`, and `curl`). `jq` is downloaded automatically — no manual setup needed.
 
-**Note**: The command is `/docs (user)` - it will show in your command list with "(user)" after it to indicate it's a user-created command.
+This installs to `~/.claude-code-docs`, adds the `/docs` command, and sets up a hook that pulls the latest docs automatically when you use it. Restart Claude Code afterward.
+
+Run the same command any time to update or migrate an existing install.
 
 ## Usage
 
-The `/docs` command provides instant access to documentation with optional freshness checking.
-
-### Default: Lightning-fast access (no checks)
 ```bash
-/docs hooks        # Instantly read hooks documentation
-/docs mcp          # Instantly read MCP documentation
-/docs memory       # Instantly read memory documentation
+/docs hooks              # read hooks documentation
+/docs mcp                # read MCP documentation
+/docs -t                 # check sync status with GitHub
+/docs what's new         # see recent doc changes
+/docs changelog          # read official Claude Code release notes
+/docs uninstall          # remove everything
 ```
 
-You'll see: `📚 Reading from local docs (run /docs -t to check freshness)`
-
-### Check documentation sync status with -t flag
-```bash
-/docs -t           # Show sync status with GitHub
-/docs -t hooks     # Check sync status, then read hooks docs
-/docs -t mcp       # Check sync status, then read MCP docs
-```
-
-### See what's new
-```bash
-/docs what's new   # Show recent documentation changes with diffs
-```
-
-### Read Claude Code changelog
-```bash
-/docs changelog    # Read official Claude Code release notes and version history
-```
-
-The changelog feature fetches the latest release notes directly from the official Claude Code repository, showing you what's new in each version.
-
-### Uninstall
-```bash
-/docs uninstall    # Get commnd to remove claude-code-docs completely
-```
-
-### Customize command name
-
-If you prefer a different command name (e.g., `/claude-docs` instead of `/docs`), you can easily customize it:
+Natural-language queries work too:
 
 ```bash
-# Rename the command file
-mv ~/.claude/commands/docs.md ~/.claude/commands/claude-docs.md
-
-# Now use /claude-docs instead of /docs
-/claude-docs hooks
-/claude-docs mcp
-```
-
-You can use any name you prefer: `/cdocs`, `/claude-code-docs`, etc. The command file name determines the slash command.
-
-### Creative usage examples
-```bash
-# Natural language queries work great
 /docs what environment variables exist and how do I use them?
-/docs explain the differences between hooks and MCP
-
-# Check for recent changes
-/docs -t what's new in the latest documentation?
-/docs changelog    # Check Claude Code release notes
-
-# Search across all docs
 /docs find all mentions of authentication
-/docs how do I customize Claude Code's behavior?
 ```
 
-## How Updates Work
+Want a different command name? Rename `~/.claude/commands/docs.md` to whatever you like — the filename is the command.
 
-The documentation attempts to stay current:
-- GitHub Actions runs periodically to fetch new documentation
-- When you use `/docs`, it checks for updates
-- Updates are pulled when available
-- You may see "🔄 Updating documentation..." when this happens
-
-Note: If automatic updates fail, you can always run the installer again to get the latest version.
-
-## Updating from Previous Versions
-
-Regardless of which version you have installed, simply run:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/ericbuess/claude-code-docs/main/install.sh | bash
-```
-
-The installer will handle migration and updates automatically.
-
-## Troubleshooting
-
-### Command not found
-If `/docs` returns "command not found":
-1. Check if the command file exists: `ls ~/.claude/commands/docs.md`
-2. Restart Claude Code to reload commands
-3. Re-run the installation script
-
-### Documentation not updating
-If documentation seems outdated:
-1. Run `/docs -t` to check sync status and force an update
-2. Manually update: `cd ~/.claude-code-docs && git pull`
-3. Check if GitHub Actions are running: [View Actions](https://github.com/ericbuess/claude-code-docs/actions)
-
-### Installation errors
-- **"git/jq/curl not found"**: Install the missing tool first
-- **"Failed to clone repository"**: Check your internet connection
-- **"Failed to update settings.json"**: Check file permissions on `~/.claude/settings.json`
-
-## Uninstalling
-
-To completely remove the docs integration:
+## Uninstall
 
 ```bash
 /docs uninstall
 ```
 
-Or run:
+or
+
 ```bash
 ~/.claude-code-docs/uninstall.sh
 ```
 
-See [UNINSTALL.md](UNINSTALL.md) for manual uninstall instructions.
+See [UNINSTALL.md](UNINSTALL.md) for manual steps.
 
-## Security Notes
+## Security notes
 
-- The installer modifies `~/.claude/settings.json` to add an auto-update hook
-- The hook only runs `git pull` when reading documentation files
-- All operations are limited to the documentation directory
-- No data is sent externally - everything is local
-- **`curl | bash` install**: The one-liner install method has no checksum verification or signature check. This is a known, accepted tradeoff for convenience. A compromised CDN or GitHub account takeover would execute arbitrary code. If this risk concerns you, use the manual install below.
-- **Manual (safer) install**:
+- The install hook only runs `git pull`, scoped to the docs directory — nothing else, nothing external.
+- The `curl | bash` installer has no checksum/signature verification (standard tradeoff for one-liner installs). For a safer path, clone manually and review `install.sh` before running it:
+
   ```bash
-  git clone https://github.com/ericbuess/claude-code-docs.git ~/.claude-code-docs
+  git clone https://github.com/bartvanhoey/claude-code-docs.git ~/.claude-code-docs
   cd ~/.claude-code-docs
-  # Review install.sh before running
   bash install.sh
   ```
-- **Repository Trust**: The installer clones from GitHub over HTTPS. For additional security, you can:
-  - Fork the repository and install from your own fork
-  - Clone manually and run the installer from the local directory
-  - Review all code before installation
-
-## What's New
-
-### v0.3.4 (Latest)
-- Added Windows support via Git Bash — `jq` downloaded automatically with CPU arch detection (amd64/arm64)
-- `$HOME` used instead of `~` in generated hook and command configs for cross-platform reliability
-- `column` command removed (not available on Windows/MINGW); topic lists now use plain sorted output
-
-### v0.3.3
-- Added Claude Code changelog integration (`/docs changelog`)
-- Fixed shell compatibility for macOS users (zsh/bash)
-- Improved documentation and error messages
-- Added platform compatibility badges
-
-### v0.3.2
-- Fixed automatic update functionality  
-- Improved handling of local repository changes
-- Better error recovery during updates
 
 ## Contributing
 
-**Contributions are welcome!** This is a community project and we'd love your help:
-
-- 🐛 **Bug Reports**: Found something not working? [Open an issue](https://github.com/ericbuess/claude-code-docs/issues)
-- 💡 **Feature Requests**: Have an idea? [Start a discussion](https://github.com/ericbuess/claude-code-docs/issues)
-- 📝 **Documentation**: Help improve docs or add examples
-
-You can also use Claude Code itself to help build features - just fork the repo and let Claude assist you!
-
-## Known Issues
-
-As this is an early beta, you might encounter some issues:
-- Auto-updates may occasionally fail on some network configurations
-- Some documentation links might not resolve correctly
-
-If you find any issues not listed here, please [report them](https://github.com/ericbuess/claude-code-docs/issues)!
+Bug reports and ideas welcome — [open an issue](https://github.com/bartvanhoey/claude-code-docs/issues).
 
 ## License
 
-Documentation content belongs to Anthropic.
-This mirror tool is open source - contributions welcome!
+Documentation content belongs to Anthropic. This mirror tool is open source.

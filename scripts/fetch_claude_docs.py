@@ -75,13 +75,13 @@ def save_manifest(docs_dir: Path, manifest: dict) -> None:
     manifest["last_updated"] = datetime.now().isoformat()
     
     # Get GitHub repository from environment or use default
-    github_repo = os.environ.get('GITHUB_REPOSITORY', 'ericbuess/claude-code-docs')
+    github_repo = os.environ.get('GITHUB_REPOSITORY', 'bartvanhoey/claude-code-docs')
     github_ref = os.environ.get('GITHUB_REF_NAME', 'main')
     
     # Validate repository name format (owner/repo)
     if not re.match(r'^[\w.-]+/[\w.-]+$', github_repo):
         logger.warning(f"Invalid repository format: {github_repo}, using default")
-        github_repo = 'ericbuess/claude-code-docs'
+        github_repo = 'bartvanhoey/claude-code-docs'
     
     # Validate branch/ref name
     if not re.match(r'^[\w.-]+$', github_ref):
@@ -136,9 +136,9 @@ def discover_sitemap_and_base_url(session: requests.Session) -> Tuple[str, str]:
             response = session.get(sitemap_url, headers=HEADERS, timeout=30)
             if response.status_code == 200:
                 # Extract base URL from the first URL in sitemap
-                # Parse XML safely to prevent XXE attacks
-                parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
-                root = ET.fromstring(response.content, parser=parser)
+                # Parse XML — ET.XMLParser doesn't support forbid_* kwargs (those are defusedxml).
+                # We rely on Python's built-in ET which is safe enough for trusted sitemap URLs.
+                root = ET.fromstring(response.content)
                 
                 # Try with namespace first
                 namespace = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -179,9 +179,8 @@ def discover_claude_code_pages(session: requests.Session, sitemap_url: str) -> L
         response = session.get(sitemap_url, headers=HEADERS, timeout=30)
         response.raise_for_status()
         
-        # Parse XML sitemap safely (Python 3.8+ required — no insecure fallback)
-        parser = ET.XMLParser(forbid_dtd=True, forbid_entities=True, forbid_external=True)
-        root = ET.fromstring(response.content, parser=parser)
+        # Parse XML sitemap — see note in discover_sitemap_and_base_url about ET.XMLParser.
+        root = ET.fromstring(response.content)
         
         # Extract all URLs from sitemap
         urls = []
@@ -246,24 +245,23 @@ def discover_claude_code_pages(session: requests.Session, sitemap_url: str) -> L
         logger.error(f"Failed to discover pages from sitemap: {e}")
         logger.warning("Falling back to essential pages...")
 
-        # More comprehensive fallback list (updated for new URL structure)
-        # NOTE: Changed from /en/docs/claude-code/ to /docs/en/
+        # Fallback list using legacy docs.anthropic.com path structure.
         return [
-            "/docs/en/overview",
-            "/docs/en/setup",
-            "/docs/en/quickstart",
-            "/docs/en/memory",
-            "/docs/en/common-workflows",
-            "/docs/en/ide-integrations",
-            "/docs/en/mcp",
-            "/docs/en/github-actions",
-            "/docs/en/sdk",
-            "/docs/en/troubleshooting",
-            "/docs/en/security",
-            "/docs/en/settings",
-            "/docs/en/hooks",
-            "/docs/en/costs",
-            "/docs/en/monitoring-usage",
+            "/en/docs/claude-code/overview",
+            "/en/docs/claude-code/setup",
+            "/en/docs/claude-code/quickstart",
+            "/en/docs/claude-code/memory",
+            "/en/docs/claude-code/common-workflows",
+            "/en/docs/claude-code/ide-integrations",
+            "/en/docs/claude-code/mcp",
+            "/en/docs/claude-code/github-actions",
+            "/en/docs/claude-code/sdk",
+            "/en/docs/claude-code/troubleshooting",
+            "/en/docs/claude-code/security",
+            "/en/docs/claude-code/settings",
+            "/en/docs/claude-code/hooks",
+            "/en/docs/claude-code/costs",
+            "/en/docs/claude-code/monitoring-usage",
         ]
 
 
@@ -465,7 +463,7 @@ def main():
     logger.info("Starting Claude Code documentation fetch (improved version)")
     
     # Log configuration
-    github_repo = os.environ.get('GITHUB_REPOSITORY', 'ericbuess/claude-code-docs')
+    github_repo = os.environ.get('GITHUB_REPOSITORY', 'bartvanhoey/claude-code-docs')
     logger.info(f"GitHub repository: {github_repo}")
     
     # Create docs directory at repository root
@@ -494,29 +492,29 @@ def main():
             logger.info("Using fallback configuration...")
             base_url = "https://docs.anthropic.com"
             sitemap_url = None
-        
+
         # Discover documentation pages dynamically
         if sitemap_url:
             documentation_pages = discover_claude_code_pages(session, sitemap_url)
         else:
-            # Use fallback pages if sitemap discovery failed (updated for new URL structure)
-            # NOTE: Changed from /en/docs/claude-code/ to /docs/en/
+            # Fallback when sitemap discovery fails.
+            # These use the legacy docs.anthropic.com path structure so they match base_url above.
             documentation_pages = [
-                "/docs/en/overview",
-                "/docs/en/setup",
-                "/docs/en/quickstart",
-                "/docs/en/memory",
-                "/docs/en/common-workflows",
-                "/docs/en/ide-integrations",
-                "/docs/en/mcp",
-                "/docs/en/github-actions",
-                "/docs/en/sdk",
-                "/docs/en/troubleshooting",
-                "/docs/en/security",
-                "/docs/en/settings",
-                "/docs/en/hooks",
-                "/docs/en/costs",
-                "/docs/en/monitoring-usage",
+                "/en/docs/claude-code/overview",
+                "/en/docs/claude-code/setup",
+                "/en/docs/claude-code/quickstart",
+                "/en/docs/claude-code/memory",
+                "/en/docs/claude-code/common-workflows",
+                "/en/docs/claude-code/ide-integrations",
+                "/en/docs/claude-code/mcp",
+                "/en/docs/claude-code/github-actions",
+                "/en/docs/claude-code/sdk",
+                "/en/docs/claude-code/troubleshooting",
+                "/en/docs/claude-code/security",
+                "/en/docs/claude-code/settings",
+                "/en/docs/claude-code/hooks",
+                "/en/docs/claude-code/costs",
+                "/en/docs/claude-code/monitoring-usage",
             ]
         
         if not documentation_pages:
