@@ -2,6 +2,7 @@
 
 [![Last Update](https://img.shields.io/github/last-commit/bartvanhoey/claude-code-docs/main.svg?label=docs%20updated)](https://github.com/bartvanhoey/claude-code-docs/commits/main)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue)](https://github.com/bartvanhoey/claude-code-docs)
+[![Documentation Update](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/update-docs.yml/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/update-docs.yml)
 [![Dependabot Updates](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/dependabot/dependabot-updates)
 [![Create Release](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/release.yml/badge.svg)](https://github.com/bartvanhoey/claude-code-docs/actions/workflows/release.yml)
 
