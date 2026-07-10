@@ -9,6 +9,14 @@ A local, auto-updating mirror of the [Claude Code docs](https://docs.anthropic.c
 
 **Windows only** — this is a fork of [claude-code-docs](https://github.com/ericbuess/claude-code-docs) by [@EricBuess](https://github.com/EricBuess), rebuilt specifically for Windows/Git Bash. macOS/Linux support from the original has been removed; use the upstream repo on those platforms.
 
+## Health Audit
+
+**Last assessed:** 2026-07-10 | **Overall:** 3.12 — Good
+
+Build A · Quality C? · Architecture A · Tests F · Dead Code A · API B~ · Security A · Docs A
+
+> Full report: [reports/health-audit-2026-07-10.md](reports/health-audit-2026-07-10.md)
+
 ## Why
 
 - **Fast** — reads local files instead of hitting the web
