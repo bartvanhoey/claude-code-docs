@@ -2,7 +2,7 @@
 
 This repository contains local copies of Claude Code documentation from https://docs.anthropic.com/en/docs/claude-code/
 
-The docs are periodically updated via GitHub Actions.
+The docs are periodically (every 3hours) updated via GitHub Actions.
 
 ## For /docs Command
 
