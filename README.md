@@ -23,11 +23,13 @@ Build A · Quality C? · Architecture A · Tests F · Dead Code A · API B~ · S
 
 ## Install
 
+Requires Windows with [Git for Windows](https://git-scm.com/download/win) (provides Git Bash, `git`, and `curl`). `jq` is downloaded automatically — no manual setup needed.
+
+Run this command in **Git Bash** (not PowerShell or Command Prompt):
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/install.sh | bash
 ```
-
-Requires Windows with [Git for Windows](https://git-scm.com/download/win) (provides Git Bash, `git`, and `curl`). `jq` is downloaded automatically — no manual setup needed.
 
 This installs to `~/.claude-code-docs`, adds the `/docs` command, and sets up a hook that pulls the latest docs automatically when you use it. Restart Claude Code afterward.
 
