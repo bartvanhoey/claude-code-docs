@@ -261,8 +261,8 @@
     "changelog.md": {
       "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
       "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-      "hash": "0ccf37c0ae8ac80dce9348cff1e31e4f57c7b68e64e2967d3e1d97dd447ddb94",
-      "last_updated": "2026-07-14T01:59:14.457571",
+      "hash": "a62cf7e36be6ddd3c8807f5d74e09d8a6b45ab955abee6149b86c946dfa93504",
+      "last_updated": "2026-07-14T07:55:21.507061",
       "source": "claude-code-repository"
     },
     "channels.md": {
@@ -1005,8 +1005,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-07-14T05:26:22.386217",
-    "fetch_duration_seconds": 162.509612,
+    "last_fetch_completed": "2026-07-14T07:55:21.508678",
+    "fetch_duration_seconds": 161.194896,
     "total_pages_discovered": 167,
     "pages_fetched_successfully": 168,
     "pages_failed": 0,
@@ -1016,7 +1016,7 @@
     "total_files": 167,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-07-14T05:26:22.386249",
+  "last_updated": "2026-07-14T07:55:21.508703",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
