@@ -796,8 +796,8 @@
     "setup.md": {
       "original_url": "https://code.claude.com/docs/en/setup",
       "original_md_url": "https://code.claude.com/docs/en/setup.md",
-      "hash": "842039a7be374086b54ec52588c894427e72c2d354cd49f3a40ea41a516710f9",
-      "last_updated": "2026-07-13T21:53:13.953903"
+      "hash": "5881b32a9835cf94f5b47d4a33fa796db46904f3d22840fbe13f4e17c55524b9",
+      "last_updated": "2026-07-14T16:12:13.187036"
     },
     "skills.md": {
       "original_url": "https://code.claude.com/docs/en/skills",
@@ -1005,8 +1005,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-07-14T13:23:28.792103",
-    "fetch_duration_seconds": 206.948184,
+    "last_fetch_completed": "2026-07-14T16:12:43.246601",
+    "fetch_duration_seconds": 163.4646,
     "total_pages_discovered": 167,
     "pages_fetched_successfully": 168,
     "pages_failed": 0,
@@ -1016,7 +1016,7 @@
     "total_files": 167,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-07-14T13:23:28.792131",
+  "last_updated": "2026-07-14T16:12:43.246624",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
