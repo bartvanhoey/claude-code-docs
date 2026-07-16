@@ -186,6 +186,8 @@ Multiple Claude Code installations can cause version mismatches or unexpected be
     ls -la ~/.local/bin/claude
     ```
 
+    A native install shows a symlink into `~/.local/share/claude/versions/`. A script or a symlink you created yourself at this path is a custom launcher, which [auto-update leaves in place](/en/setup#auto-updates).
+
     If either `ls` command prints `No such file or directory`, that's not an error. It means nothing is installed at that location, so move on to the next check.
 
     ```bash theme={null}
@@ -421,11 +423,11 @@ Errors like `curl: (35) TLS connect error`, `schannel: next InitializeSecurityCo
    ```
    Ask your IT team for the certificate file if you don't have it. You can also try on a direct connection to confirm the proxy is the cause.
 
-4. **On Windows, bypass certificate revocation checks** if you see `CRYPT_E_NO_REVOCATION_CHECK (0x80092012)` or `CRYPT_E_REVOCATION_OFFLINE (0x80092013)`. These mean curl reached the server but your network blocks the certificate revocation lookup, which is common behind corporate firewalls. Add `--ssl-revoke-best-effort` to the install command:
-   ```batch theme={null}
-   curl --ssl-revoke-best-effort -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+4. **On Windows, switch installers if your network blocks revocation checks**. The errors `CRYPT_E_NO_REVOCATION_CHECK (0x80092012)` and `CRYPT_E_REVOCATION_OFFLINE (0x80092013)` mean curl reached the server but your network blocks the certificate revocation lookup, which is common behind corporate firewalls. Adding curl's `--ssl-revoke-best-effort` flag doesn't fix this: the flag only applies to downloading `install.cmd` itself, and the script's own downloads run without it, so the install fails with the same error. Use an install method that tolerates the blocked lookup instead. Open PowerShell and run the PowerShell installer, which downloads through .NET and doesn't fail when the revocation server is unreachable:
+   ```powershell theme={null}
+   irm https://claude.ai/install.ps1 | iex
    ```
-   Alternatively, install with `winget install Anthropic.ClaudeCode`, which avoids curl entirely.
+   You can also install with `winget install Anthropic.ClaudeCode`, which avoids curl entirely.
 
 ### `Failed to fetch version from downloads.claude.ai`
 
@@ -806,6 +808,8 @@ This fallback also applies on native Windows or any terminal where pasting into 
 If Claude Code prompts you to log in again after a session, your OAuth token may have expired.
 
 Run `/login` to re-authenticate. If this happens frequently, check that your system clock is accurate, as token validation depends on correct timestamps.
+
+Parallel sessions on one machine share a saved login and coordinate its renewal so that only one process refreshes the token at a time. {/* min-version: 2.1.211 */}Before v2.1.211, waking the machine from sleep could cause two sessions to renew with the same token, which revoked the saved login and prompted every open session to log in again at once.
 
 On macOS, login can also fail when the Keychain is locked or its password is out of sync with your account password, which prevents Claude Code from saving credentials. Run `claude doctor` to check Keychain access. To unlock the Keychain manually, run `security unlock-keychain ~/Library/Keychains/login.keychain-db`. If unlocking doesn't help, open Keychain Access, select the `login` keychain, and choose Edit > Change Password for Keychain "login" to resync it with your account password.
 

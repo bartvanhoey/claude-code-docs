@@ -27,9 +27,9 @@
 | `Ctrl+C`                                                  | Interrupt, or clear input                                                                                                                                  | Interrupts a running operation. If nothing is running, the first press clears the prompt input and a second press exits Claude Code                                                                                                                                                                                                |
 | `Ctrl+X Ctrl+K`                                           | Stop all running [background subagents](/en/sub-agents#run-subagents-in-foreground-or-background) in this session. Press twice within 3 seconds to confirm | Subagent control                                                                                                                                                                                                                                                                                                                   |
 | `Ctrl+D`                                                  | Exit Claude Code session                                                                                                                                   | EOF signal                                                                                                                                                                                                                                                                                                                         |
-| `Ctrl+G` or `Ctrl+X Ctrl+E`                               | Open in default text editor                                                                                                                                | Edit your prompt or custom response in your default text editor. `Ctrl+X Ctrl+E` is the readline-native binding. Turn on Show last response in external editor in `/config` to prepend Claude's previous reply as `#`-commented context above your prompt; the comment block is stripped when you save                             |
+| `Ctrl+G` or `Ctrl+X Ctrl+E`                               | Open in default text editor                                                                                                                                | Edit your prompt or custom response in your default text editor. `Ctrl+X Ctrl+E` is the readline-native binding. Turn on **Show last response in external editor** in `/config` to prepend Claude's previous reply as `#`-commented context above your prompt; Claude Code strips the comment block when you save                  |
 | `Ctrl+L`                                                  | Redraw screen                                                                                                                                              | Forces a full terminal redraw. Input and conversation history are kept. Use this to recover if the display becomes garbled or partially blank                                                                                                                                                                                      |
-| `Ctrl+O`                                                  | Toggle transcript viewer                                                                                                                                   | Shows detailed tool usage and execution. Also expands MCP calls, which collapse to a single line like "Called slack 3 times" by default                                                                                                                                                                                            |
+| `Ctrl+O`                                                  | Toggle transcript viewer                                                                                                                                   | Shows detailed tool usage and execution, with a timestamp and the model used on each assistant message. Also expands MCP calls, which collapse to a single line like "Called slack 3 times" by default                                                                                                                             |
 | `Ctrl+R`                                                  | Reverse search command history                                                                                                                             | Search through previous commands interactively                                                                                                                                                                                                                                                                                     |
 | `Ctrl+V` or `Cmd+V` (iTerm2) or `Alt+V` (Windows and WSL) | Paste image from clipboard                                                                                                                                 | Inserts an `[Image #N]` chip at the cursor so you can reference it positionally in your prompt. On WSL, both `Ctrl+V` and `Alt+V` are bound; use `Alt+V` if your terminal intercepts `Ctrl+V`                                                                                                                                      |
 | `Ctrl+B`                                                  | Background running tasks                                                                                                                                   | Backgrounds Bash commands and agents. Tmux users press twice                                                                                                                                                                                                                                                                       |
@@ -79,11 +79,12 @@
 
 ### Quick commands
 
-| Shortcut     | Description       | Notes                                                                                |
-| :----------- | :---------------- | :----------------------------------------------------------------------------------- |
-| `/` at start | Command or skill  | See [commands](#commands) and [skills](/en/skills)                                   |
-| `!` at start | Shell mode        | Run a command directly, add its output to the session, and have Claude respond to it |
-| `@`          | File path mention | Trigger file path autocomplete                                                       |
+| Shortcut           | Description                    | Notes                                                                                                                                                                                                                                       |
+| :----------------- | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/` at start       | Command or skill               | See [commands](#commands) and [skills](/en/skills)                                                                                                                                                                                          |
+| `!` at start       | Shell mode                     | Run a command directly, add its output to the session, and have Claude respond to it                                                                                                                                                        |
+| `@`                | File path mention              | Trigger file path autocomplete                                                                                                                                                                                                              |
+| `?` on empty input | Toggle the shortcut help panel | Typing `?` when the input already contains text inserts the character. {/* min-version: 2.1.211 */}Before v2.1.211, an edit that left a lone `?` in the input, such as backspacing from `?x`, also toggled the panel and discarded the edit |
 
 ### Transcript viewer
 
@@ -108,6 +109,8 @@ When the transcript viewer is open (toggled with `Ctrl+O`), these shortcuts are 
 
 Type `/` in Claude Code to see all available commands, or type `/` followed by any letters to filter. The `/` menu shows everything you can invoke: built-in commands, bundled and user-authored [skills](/en/skills), and commands contributed by [plugins](/en/plugins) and [MCP servers](/en/mcp#use-mcp-prompts-as-commands). Not all built-in commands are visible to every user since some depend on your platform or plan.
 
+In [fullscreen rendering](/en/fullscreen#use-the-mouse), the `/` command and `@` file suggestion lists also respond to the mouse: hovering highlights a row and clicking accepts it.
+
 See the [commands reference](/en/commands) for the full list of commands included in Claude Code.
 
 ## Vim editor mode
@@ -127,6 +130,25 @@ Enable vim-style editing via `/config` → Editor mode.
 | `O`     | Open line above                       | NORMAL         |
 | `v`     | Start character-wise visual selection | NORMAL         |
 | `V`     | Start line-wise visual selection      | NORMAL         |
+
+### Remap INSERT-mode key sequences
+
+The [`vimInsertModeRemaps`](/en/settings#available-settings) setting maps a two-key INSERT-mode sequence to Escape, so a mapping like `jj` returns you to NORMAL mode. {/* min-version: 2.1.208 */}Requires Claude Code v2.1.208 or later.
+
+The following `~/.claude/settings.json` example turns on vim mode and maps `jj` to Escape:
+
+```json theme={null}
+{
+  "editorMode": "vim",
+  "vimInsertModeRemaps": { "jj": "<Esc>" }
+}
+```
+
+Each key is exactly two printable characters typed in sequence, and `"<Esc>"` is the only supported target. Entries with a different length or target are ignored.
+
+Typing the first character of a sequence inserts it normally. Pressing the second character within one second removes that pending character and switches to NORMAL mode, leaving neither character in your input. After the one-second window, or if a different key follows, both characters stay as literal text, so you can still type a word containing the sequence by pausing between the two keys.
+
+Claude Code reads this setting from your user settings file, the `--settings` flag, and [managed settings](/en/permissions#managed-settings) only. Entries in a project's `.claude/settings.json` or `.claude/settings.local.json` are ignored, so a checked-out repository can't remap your keystrokes.
 
 ### Navigation (NORMAL mode)
 
@@ -156,24 +178,26 @@ Enable vim-style editing via `/config` → Editor mode.
 
 ### Editing (NORMAL mode)
 
-| Command        | Action                  |
-| :------------- | :---------------------- |
-| `x`            | Delete character        |
-| `dd`           | Delete line             |
-| `D`            | Delete to end of line   |
-| `dw`/`de`/`db` | Delete word/to end/back |
-| `cc`           | Change line             |
-| `C`            | Change to end of line   |
-| `cw`/`ce`/`cb` | Change word/to end/back |
-| `yy`/`Y`       | Yank (copy) line        |
-| `yw`/`ye`/`yb` | Yank word/to end/back   |
-| `p`            | Paste after cursor      |
-| `P`            | Paste before cursor     |
-| `>>`           | Indent line             |
-| `<<`           | Dedent line             |
-| `J`            | Join lines              |
-| `u`            | Undo                    |
-| `.`            | Repeat last change      |
+| Command        | Action                                                                                                                                                |
+| :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `x`            | Delete character                                                                                                                                      |
+| `dd`           | Delete line                                                                                                                                           |
+| `D`            | Delete to end of line                                                                                                                                 |
+| `dw`/`de`/`db` | Delete word/to end/back                                                                                                                               |
+| `cc`           | Change line                                                                                                                                           |
+| `C`            | Change to end of line                                                                                                                                 |
+| `cw`/`ce`/`cb` | Change word/to end/back                                                                                                                               |
+| `s`            | Substitute character: delete the character under the cursor and enter INSERT mode. {/* min-version: 2.1.211 */}Requires Claude Code v2.1.211 or later |
+| `S`            | Substitute line: clear the line and enter INSERT mode. {/* min-version: 2.1.211 */}Requires Claude Code v2.1.211 or later                             |
+| `yy`/`Y`       | Yank (copy) line                                                                                                                                      |
+| `yw`/`ye`/`yb` | Yank word/to end/back                                                                                                                                 |
+| `p`            | Paste after cursor                                                                                                                                    |
+| `P`            | Paste before cursor                                                                                                                                   |
+| `>>`           | Indent line                                                                                                                                           |
+| `<<`           | Dedent line                                                                                                                                           |
+| `J`            | Join lines                                                                                                                                            |
+| `u`            | Undo                                                                                                                                                  |
+| `.`            | Repeat last change                                                                                                                                    |
 
 ### Text objects (NORMAL mode)
 

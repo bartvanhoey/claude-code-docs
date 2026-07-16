@@ -172,6 +172,8 @@ upstreams:
 
 An empty `auth` block uses the AWS SDK's default credential chain: env vars, `~/.aws/credentials`, ECS task role, EC2 instance metadata, or IRSA on EKS. In production, give the gateway pod an IAM role instead of embedding static keys in a container image.
 
+Explicit credentials must be complete: the gateway fails at boot when `aws_access_key_id` and `aws_secret_access_key` aren't set together, or when `aws_session_token` is set without them. Before v2.1.207, a partial `auth:` block passed validation.
+
 | Setup           | How                                                                                                                                                                                                                                                                                                                                               |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | IAM permissions | Grant the gateway's principal `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` on both the inference-profile ARNs and the underlying foundation-model ARNs. For the built-in catalog in US regions: `arn:aws:bedrock:<region>:<account>:inference-profile/us.anthropic.*` and `arn:aws:bedrock:*::foundation-model/anthropic.*`. |
@@ -474,14 +476,14 @@ managed:
                 - { type: command, command: /usr/local/bin/audit-edit.sh }
 ```
 
-| Key                                        | Enforced by   | Effect                                                                                                                                                                                                        |
-| ------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `availableModels`                          | Gateway + CLI | Model allowlist. Also checked at `/v1/messages`, so a patched client can't bypass it.                                                                                                                         |
-| `permissions.allow` / `.deny`              | CLI           | Tool and command rules. See [Permissions](/en/permissions).                                                                                                                                                   |
-| `permissions.disableBypassPermissionsMode` | CLI           | Set to `disable` to block [`bypassPermissions`](/en/permission-modes#skip-all-checks-with-bypasspermissions-mode), the mode that auto-approves every tool call, and the `--dangerously-skip-permissions` flag |
-| `allowManagedPermissionRulesOnly`          | CLI           | When `true`, user and project permission rules are ignored; only rules from this document apply                                                                                                               |
-| `env`                                      | CLI           | Environment variables merged into the CLI process. Use for telemetry, auto-update, and model-name overrides.                                                                                                  |
-| `hooks`                                    | CLI           | Org-wide [hooks](/en/hooks)                                                                                                                                                                                   |
+| Key                                        | Enforced by   | Effect                                                                                                                                                                                                   |
+| ------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `availableModels`                          | Gateway + CLI | Model allowlist. Also checked at `/v1/messages`, so a patched client can't bypass it.                                                                                                                    |
+| `permissions.allow` / `.deny`              | CLI           | Tool and command rules. See [Permissions](/en/permissions).                                                                                                                                              |
+| `permissions.disableBypassPermissionsMode` | CLI           | Set to `disable` to block [`bypassPermissions`](/en/permission-modes#skip-all-checks-with-bypasspermissions-mode), the mode that skips permission prompts, and the `--dangerously-skip-permissions` flag |
+| `allowManagedPermissionRulesOnly`          | CLI           | When `true`, user and project permission rules are ignored; only rules from this document apply                                                                                                          |
+| `env`                                      | CLI           | Environment variables merged into the CLI process. Use for telemetry, auto-update, and model-name overrides.                                                                                             |
+| `hooks`                                    | CLI           | Org-wide [hooks](/en/hooks)                                                                                                                                                                              |
 
 Because these settings arrive over the network, the CLI shows each developer a one-time security approval dialog before applying anything that can run a shell command or alter where traffic goes. The dialog covers:
 
@@ -495,7 +497,9 @@ The safe list determines which `env` variables apply without approval:
 * **On the safe list**: auto-update and model-name vars
 * **Not on the safe list**: proxy vars, base-URL vars, and `OTEL_EXPORTER_OTLP_ENDPOINT`
 
-The gateway's [telemetry](#telemetry) configuration pushes `OTEL_EXPORTER_OTLP_ENDPOINT`, so setting `telemetry.forward_to` triggers the dialog on each interactive client. Non-interactive runs with the `-p` flag skip the dialog and apply settings without approval. The dialog protects the developer's machine from a compromised or hostile gateway, not the organization from the developer, so the `-p` skip is intentional rather than a gap.
+The gateway's [telemetry](#telemetry) configuration pushes `OTEL_EXPORTER_OTLP_ENDPOINT`, so setting `telemetry.forward_to` triggers the dialog on each interactive client. The dialog protects the developer's machine from a compromised or hostile gateway, not the organization from the developer.
+
+A non-interactive run with the `-p` flag can't show the dialog. It applies the pushed settings for that run only and doesn't record them as approved, so the developer's next interactive session still shows the dialog. Before v2.1.207, a non-interactive run saved the settings as approved and no later interactive session showed the dialog for them.
 
 If a developer declines, Claude Code exits rather than applying the policy. Pushing a new hook or non-safe env var to a broad policy therefore means an approval prompt on every matching developer's next startup.
 

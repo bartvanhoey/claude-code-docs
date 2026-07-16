@@ -12,18 +12,14 @@
 
 Remote Control connects [claude.ai/code](https://claude.ai/code) or the Claude app for [iOS](https://apps.apple.com/us/app/claude-by-anthropic/id6473753684) and [Android](https://play.google.com/store/apps/details?id=com.anthropic.claude) to a Claude Code session running on your machine. Start a task at your desk, then pick it up from your phone on the couch or a browser on another computer.
 
-When you start a Remote Control session on your machine, Claude keeps running locally the entire time, so nothing moves to the cloud. With Remote Control you can:
+When you start a Remote Control session on your machine, Claude keeps running locally the entire time, so your code execution and filesystem access stay on your machine. With Remote Control you can:
 
 * **Use your full local environment remotely**: your filesystem, [MCP servers](/en/mcp), tools, and project configuration all stay available, and typing `@` autocompletes file paths from your local project
-* **Work from both surfaces at once**: the conversation stays in sync across all connected devices, so you can send messages from your terminal, browser, and phone interchangeably
+* **Work from both surfaces at once**: the conversation and the progress of [subagents](/en/sub-agents) and [dynamic workflows](/en/workflows) stay in sync across all connected devices, so you can send messages from your terminal, browser, and phone interchangeably. {/* min-version: 2.1.207 */}Before v2.1.207, sessions hosted by the [Desktop app](/en/desktop) didn't send subagent or workflow progress to connected devices.
 * **Send images and files from your phone or browser**: when you add an attachment in the Claude app or at claude.ai/code, Claude Code downloads it to your machine and passes it to Claude as an `@` file reference, with or without a caption. {/* min-version: 2.1.202 */}Before v2.1.202, Claude Code could drop an attachment sent without a caption before it reached the session.
-* **Survive interruptions**: if your laptop sleeps or your network drops, the session reconnects automatically when your machine comes back online
+* **Survive interruptions**: if your laptop sleeps or your network drops, the session reconnects automatically when your machine comes back online. Claude Code queues status updates from subagents and workflows while the connection is rebuilding and delivers them once it recovers. {/* min-version: 2.1.207 */}Before v2.1.207, an update sent during a reconnection or credential refresh could be lost, so the connected device kept showing a finished task as running.
 
-Unlike [Claude Code on the web](/en/claude-code-on-the-web), which runs on cloud infrastructure, Remote Control sessions run directly on your machine and interact with your local filesystem. The web and mobile interfaces are just a window into that local session.
-
-<Note>
-  Remote Control requires Claude Code v2.1.51 or later. Check your version with `claude --version`.
-</Note>
+Unlike [Claude Code on the web](/en/claude-code-on-the-web), which runs on cloud infrastructure, Remote Control sessions run directly on your machine and interact with your local filesystem. The web and mobile interfaces are a window into that local session.
 
 This page covers setup, how to start and connect to sessions, and how Remote Control compares to Claude Code on the web.
 
@@ -100,13 +96,13 @@ You can start a Remote Control session from the CLI or the VS Code extension. Th
   </Tab>
 
   <Tab title="VS Code">
-    In the [Claude Code VS Code extension](/en/vs-code), type `/remote-control` or `/rc` in the prompt box, or open the command menu with `/` and select it. Requires Claude Code v2.1.79 or later.
+    In the [Claude Code VS Code extension](/en/vs-code), type `/remote-control` or `/rc` in the prompt box, or open the command menu with `/` and select it.
 
     ```text theme={null}
     /remote-control
     ```
 
-    A banner appears above the prompt box showing connection status. Once connected, click **Open in browser** in the banner to go directly to the session, or find it in the session list at [claude.ai/code](https://claude.ai/code). The session URL is also posted in the conversation.
+    A banner appears above the prompt box showing connection status. Once connected, click **claude.ai/code** in the banner to go directly to the session, or find it in the session list at [claude.ai/code](https://claude.ai/code). Claude Code also posts the session URL in the conversation.
 
     To disconnect, click the close icon on the banner or run `/remote-control` again.
 
@@ -127,6 +123,8 @@ Once a Remote Control session is active, you have a few ways to connect from ano
 * **Open the session URL** in any browser to go directly to the session on [claude.ai/code](https://claude.ai/code).
 * **Scan the QR code** shown alongside the session URL to open it directly in the Claude app. With `claude remote-control`, press spacebar to toggle the QR code display.
 * **Open [claude.ai/code](https://claude.ai/code) or the Claude app** and find the session by name in the session list. In the Claude mobile app, tap **Code** in the navigation to reach the session list. Remote Control sessions show a computer icon with a green status dot when online.
+
+When you connect, the device shows any subagents and workflows the session already has running in the background. {/* min-version: 2.1.208 */}Before v2.1.208, a device connecting to a session hosted in an interactive terminal didn't show subagents and workflows that were already running until one of them started or stopped.
 
 The remote session title is chosen in this order:
 
@@ -152,6 +150,10 @@ With this setting on, each interactive Claude Code process registers one remote 
 Your local Claude Code session makes outbound HTTPS requests only and never opens inbound ports on your machine. When you start Remote Control, it registers with the Anthropic API and polls for work. When you connect from another device, the server routes messages between the web or mobile client and your local session over a streaming connection.
 
 All traffic travels through the Anthropic API over TLS, the same transport security as any Claude Code session. The connection uses multiple short-lived credentials, each scoped to a single purpose and expiring independently.
+
+While Remote Control is connected, the session transcript, including your messages, Claude's responses, and tool activity, is stored on Anthropic servers. The stored transcript keeps the conversation in sync across your devices and lets the session reconnect after a network drop. Execution and filesystem access stay on your machine, and stored transcripts are retained under the [Data usage](/en/data-usage) policy.
+
+To turn Remote Control off entirely, use the [`disableRemoteControl`](/en/settings#available-settings) setting. Organizations with compliance requirements such as Zero Data Retention can't enable Remote Control.
 
 ## Trusted Devices
 
@@ -220,10 +222,6 @@ When Remote Control is active, Claude can send push notifications to your phone.
 
 Claude decides when to push. It typically sends one when a long-running task finishes or when it needs a decision from you to continue. You can also request a push in your prompt, for example `notify me when the tests finish`. Beyond the two on/off toggles below, there is no per-event configuration.
 
-<Note>
-  Mobile push notifications require Claude Code v2.1.110 or later.
-</Note>
-
 To set up mobile push notifications:
 
 <Steps>
@@ -259,16 +257,19 @@ Claude Code skips mobile push notifications while you are typing in or focused o
 * **Extended network outage**: if your machine is awake but unable to reach the network for more than roughly 10 minutes, the session times out and the process exits. Run `claude remote-control` again to start a new session.
 * **Ultraplan disconnects Remote Control**: starting an [ultraplan](/en/ultraplan) session disconnects any active Remote Control session because both features occupy the claude.ai/code interface and only one can be connected at a time.
 * **Some commands are local-only**: commands that only run in the terminal interface, such as `/plugin` or `/resume`, work only from the local CLI, whether or not you pass an argument. The following work from mobile and web:
-  * Text-output commands: `/compact`, `/clear`, `/context`, `/usage`, `/exit`, `/usage-credits`, `/recap`, `/reload-plugins`
+  * Text-output commands: `/compact`, `/clear`, `/context`, `/usage`, `/exit`, `/usage-credits` (runs the text form instead of opening the in-CLI dialog), `/recap`, `/reload-plugins`
   * `/model`, `/effort`, `/fast`, `/color`, and `/rename`: pass the value as an argument, for example `/model sonnet` or `/effort high`. From mobile and web, `/model` and `/effort` take the argument in place of the terminal picker or slider.
-  * {/* min-version: 2.1.166 */}`/mcp`, from v2.1.166: returns a text summary of server status instead of opening the picker, and accepts the `reconnect`, `enable`, and `disable` [subcommands](/en/commands#all-commands). Unlike the local CLI, `/mcp reconnect` without a server name reconnects every server that has failed or needs authentication.
-  * {/* min-version: 2.1.181 */}`/config`, from v2.1.181: pass `key=value` to set a setting, or run it with no argument to list the keys you can set.
+  * {/* min-version: 2.1.166 */}`/mcp`, from v2.1.166: from the mobile app, returns a text summary of server status instead of opening the picker. On the web, `/mcp` on its own opens a directory of [claude.ai connectors](/en/mcp#use-mcp-servers-from-claude-ai) instead of returning the summary. The `reconnect`, `enable`, and `disable` [subcommands](/en/commands#all-commands) work from both. Unlike the local CLI, `/mcp reconnect` without a server name reconnects every server that has failed or needs authentication.
+  * {/* min-version: 2.1.181 */}`/config`, from v2.1.181: from the mobile app, pass `key=value` to set a setting, or run it with no argument to list the keys you can set. On the web, `/config` opens the Claude Code section of your settings instead, and ignores text after the command.
+  * {/* min-version: 2.1.211 */}On Team and Enterprise, `/usage-credits` from mobile or web doesn't send a [usage-credits request to your admin](/en/costs#set-a-spend-limit-on-pro-and-max). Sending requires a confirmation that appears only in the interactive CLI, so the command tells you to run it there instead. Before v2.1.211, the text form sent the request without confirmation.
 
 ## Troubleshooting
 
 ### "Remote Control requires a claude.ai subscription"
 
 You're not authenticated with a claude.ai account. Run `claude auth login` and choose the claude.ai option. If `ANTHROPIC_API_KEY` is set in your environment, unset it first.
+
+{/* min-version: 2.1.206 */}Before v2.1.206, running `/remote-control` while signed out reported `Unknown command: /remote-control` instead of this message.
 
 ### "Remote Control requires a full-scope login token"
 

@@ -264,6 +264,8 @@ A subagent starts in the main conversation's current working directory. Within a
 
 {/* min-version: 2.1.203 */}A subagent with `isolation: worktree` runs its Bash and PowerShell commands inside its worktree. A command whose working directory resolves to your main checkout instead, for example because the worktree directory was removed while the subagent was running, fails with an error. Before v2.1.203, such a command could run in the main checkout.
 
+{/* min-version: 2.1.210 */}This working-directory check covers the whole repository containing the directory you launched Claude Code from. When your session runs in a linked [worktree](/en/worktrees) of its own, the check also covers the main checkout that worktree is linked from. Before v2.1.210, the check covered only the launch directory itself. A command whose working directory resolved elsewhere in the same repository, such as the repository root when you launched Claude Code from a monorepo subdirectory, ran there instead of failing.
+
 #### Supported frontmatter fields
 
 The following fields can be used in the YAML frontmatter. Only `name` and `description` are required.
@@ -272,7 +274,7 @@ The following fields can be used in the YAML frontmatter. Only `name` and `descr
 | :---------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`            | Yes      | Unique identifier using lowercase letters and hyphens. [Hooks](/en/hooks#subagentstart) receive this value as `agent_type`. The filename doesn't have to match                                                                                                                                                                           |
 | `description`     | Yes      | When Claude should delegate to this subagent                                                                                                                                                                                                                                                                                             |
-| `tools`           | No       | [Tools](#available-tools) the subagent can use. Inherits all tools if omitted. To preload Skills into context, use the `skills` field rather than listing `Skill` here                                                                                                                                                                   |
+| `tools`           | No       | [Tools](#available-tools) the subagent can use. Inherits all tools if omitted. If no entry in the list resolves to a tool, the subagent fails to launch with an error naming the entries. To preload Skills into context, use the `skills` field rather than listing `Skill` here                                                        |
 | `disallowedTools` | No       | Tools to deny, removed from inherited or specified list                                                                                                                                                                                                                                                                                  |
 | `model`           | No       | [Model](#choose-a-model) to use: `sonnet`, `opus`, `haiku`, `fable`, a full model ID (for example, `claude-opus-4-8`), or `inherit`. Defaults to `inherit`                                                                                                                                                                               |
 | `permissionMode`  | No       | [Permission mode](#permission-modes): `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `plan`, or {/* min-version: 2.1.200 */}`manual` as an alias for `default`. The `manual` alias requires Claude Code v2.1.200 or later. Ignored for [plugin subagents](#choose-the-subagent-scope)                                 |
@@ -306,6 +308,8 @@ When Claude invokes a subagent, it can also pass a `model` parameter for that sp
 {/* min-version: 2.1.196 */}As of v2.1.196, setting `CLAUDE_CODE_SUBAGENT_MODEL` to `inherit` is the same as leaving it unset: resolution continues with the per-invocation `model` parameter, then the frontmatter. In earlier versions, `inherit` forced subagents onto the main conversation's model and ignored both of those sources.
 
 Claude Code checks the environment variable, per-invocation parameter, and frontmatter values against your organization's [`availableModels`](/en/model-config#restrict-model-selection) allowlist. It skips a value that resolves to an excluded model and runs the subagent on the inherited model instead.
+
+{/* min-version: 2.1.211 */}A per-invocation `model` parameter also applies when the subagent is [resumed or sent a follow-up message](#resume-subagents), so the subagent stays on that model. Before v2.1.211, resuming dropped the per-invocation value and the subagent reverted to its definition's `model` field or, without one, the main conversation's model.
 
 {/* min-version: 2.1.198 */}As of v2.1.198, subagents also inherit the main conversation's [extended thinking](/en/model-config#extended-thinking) configuration: if thinking is on in your session, it's on for the subagent, and if it's off, it stays off. There is no per-subagent thinking setting. Before v2.1.198, subagents ran with extended thinking disabled regardless of the main conversation's setting.
 
@@ -344,6 +348,8 @@ disallowedTools: Write, Edit
 ```
 
 If both are set, `disallowedTools` is applied first, then `tools` is resolved against the remaining pool. A tool listed in both is removed.
+
+When nothing in the `tools` list resolves to a tool, for example because every entry is misspelled or names a tool that isn't available to subagents, Claude Code refuses to launch the subagent and the Agent tool returns an error naming the unresolved entries. {/* min-version: 2.1.208 */}Before v2.1.208, that subagent launched with no tools and could return an empty or confusing result.
 
 Both fields accept MCP server-level patterns in addition to exact tool names: `mcp__<server>` or `mcp__<server>__*` grants or removes every tool from the named server. In `disallowedTools`, `mcp__*` also removes every MCP tool from any server. This example removes every tool from the `github` MCP server while keeping tools from other servers and every built-in tool:
 
@@ -431,17 +437,19 @@ Managed-settings restrictions apply to every subagent regardless of how it is de
 
 The `permissionMode` field controls how the subagent handles permission prompts. Subagents inherit the permission context from the main conversation and can override the mode, except when the parent mode takes precedence as described below.
 
-| Mode                | Behavior                                                                                                                                    |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| `default`           | Standard permission checking with prompts                                                                                                   |
-| `acceptEdits`       | Auto-accept file edits and common filesystem commands for paths in the working directory or `additionalDirectories`                         |
-| `auto`              | [Auto mode](/en/permission-modes#eliminate-prompts-with-auto-mode): a background classifier reviews commands and protected-directory writes |
-| `dontAsk`           | Auto-deny permission prompts (explicitly allowed tools still work)                                                                          |
-| `bypassPermissions` | Skip permission prompts                                                                                                                     |
-| `plan`              | Plan mode (read-only exploration)                                                                                                           |
+| Mode                | Behavior                                                                                                                                                                                                                                                                                                                        |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `default`           | Standard permission checking with prompts                                                                                                                                                                                                                                                                                       |
+| `acceptEdits`       | Auto-accept file edits and common filesystem commands for paths in the working directory or `additionalDirectories`                                                                                                                                                                                                             |
+| `auto`              | [Auto mode](/en/permission-modes#eliminate-prompts-with-auto-mode): a background classifier reviews commands and protected-directory writes                                                                                                                                                                                     |
+| `dontAsk`           | Auto-deny permission prompts. Explicitly allowed tools still work; `AskUserQuestion`, connector tools [your organization set to `ask`](/en/mcp#organization-controls-on-connector-tools), and MCP tools marked [`requiresUserInteraction`](/en/mcp#require-approval-for-a-specific-tool) are denied even if you've allowed them |
+| `bypassPermissions` | Skip permission prompts                                                                                                                                                                                                                                                                                                         |
+| `plan`              | Plan mode (read-only exploration)                                                                                                                                                                                                                                                                                               |
 
 <Warning>
-  Use `bypassPermissions` with caution. It skips permission prompts, allowing the subagent to execute operations without approval, including writes to `.git`, `.config/git`, `.claude`, `.vscode`, `.idea`, `.husky`, `.cargo`, `.devcontainer`, `.yarn`, and `.mvn`. Explicit [`ask` rules](/en/permissions#manage-permissions) and root and home directory removals such as `rm -rf /` still prompt. See [permission modes](/en/permission-modes#skip-all-checks-with-bypasspermissions-mode) for details.
+  Use `bypassPermissions` with caution. It skips permission prompts, allowing the subagent to execute operations without approval, including writes to `.git`, `.config/git`, `.claude`, `.vscode`, `.idea`, `.husky`, `.cargo`, `.devcontainer`, `.yarn`, and `.mvn`.
+
+  Explicit [`ask` rules](/en/permissions#manage-permissions), connector tools [your organization set to `ask`](/en/mcp#organization-controls-on-connector-tools), MCP tools marked [`requiresUserInteraction`](/en/mcp#require-approval-for-a-specific-tool), and root and home directory removals such as `rm -rf /` still prompt. See [permission modes](/en/permission-modes#skip-all-checks-with-bypasspermissions-mode) for details.
 </Warning>
 
 If the parent uses `bypassPermissions` or `acceptEdits`, this takes precedence and can't be overridden. If the parent uses [auto mode](/en/permission-modes#eliminate-prompts-with-auto-mode), the subagent inherits auto mode and any `permissionMode` in its frontmatter is ignored: the classifier evaluates the subagent's tool calls with the same block and allow rules as the parent session.
@@ -733,10 +741,14 @@ Subagents can run in the foreground or the background:
 
 {/* min-version: 2.1.198 */}As of v2.1.198, subagents run in the background by default. Claude runs a subagent in the foreground when it needs the result before continuing. The default changes where a subagent runs, not what it's allowed to do: background subagents still surface every permission prompt in your main session. Before v2.1.198, Claude chose between foreground and background based on the task.
 
+{/* min-version: 2.1.211 */}A background subagent's results reach Claude as a completion notification in a later turn. Claude waits for that notification before reporting the subagent's results, and if you ask about progress first, it reports that the subagent is still running. Before v2.1.211, Claude sometimes reported results for a background subagent that hadn't finished.
+
 You can also steer this yourself:
 
 * Ask Claude to run a task in the background or in the foreground
 * Press **Ctrl+B** to background a running task
+
+{/* min-version: 2.1.208 */}A background subagent that completes stays listed in [`/tasks`](/en/commands), marked done and sorted below running work, until the session cleans up its task list. Its detail view stays open when the subagent finishes. Subagents that fail or that you stop leave the list. Before v2.1.208, a completed subagent left the list the moment it finished and its detail view closed.
 
 To disable all background task functionality, set the `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` environment variable to `1`. See [Environment variables](/en/env-vars).
 
@@ -750,6 +762,19 @@ When [`CLAUDE_CODE_FORK_SUBAGENT`](#fork-the-current-conversation) is set to `1`
 * **Background**: the subagent is marked failed, and the message Claude receives when it ends names the API error and includes the subagent's last output, so partial work isn't lost.
 
 Once the underlying API error clears, ask Claude to retry the task or [resume the subagent](#resume-subagents).
+
+### Subagent output scanning
+
+Claude Code scans each subagent's final report before Claude reads it. A subagent may have read files, web pages, or command output you never reviewed, and text from those sources can carry instructions aimed at the main conversation. The scan never removes or rewords anything; it makes two kinds of change you may notice in a report:
+
+* **Backslash insertion**: the scan inserts a backslash into text that imitates Claude Code's own output, such as a `<system-reminder>` tag or a line starting with `Human:` or `Assistant:`, so the imitation reads as ordinary text instead of being mistaken for part of the conversation.
+* **Marker line**: the scan prepends a line starting with `[harness: subagent output matched instruction-shaped pattern(s):` when the report imitates a tag like `<system-reminder>` or mentions permission settings such as `bypassPermissions` or `--dangerously-skip-permissions`. Permission-setting mentions get the marker line, but the text itself stays as written.
+
+The scan doesn't judge whether content is malicious, and it doesn't change what an instruction in a report can do: a tool call the report leads Claude to make still goes through the session's [permission checks](/en/permissions) and [sandboxing](/en/sandboxing). It isn't a substitute for [restricting what a subagent can reach](#control-subagent-capabilities).
+
+<Note>
+  Subagent output scanning requires Claude Code v2.1.210 or later.
+</Note>
 
 ### Common patterns
 
@@ -833,6 +858,7 @@ A non-fork subagent's initial context contains:
 * **CLAUDE.md and memory**: every level of the [memory hierarchy](/en/memory#how-claude-md-files-load) the main conversation loads, including `~/.claude/CLAUDE.md`, project rules, `CLAUDE.local.md`, and managed policy files. The built-in Explore and Plan agents skip this.
 * **Git status**: a snapshot taken at the start of the parent session. Absent when the working directory isn't a Git repository or when [`includeGitInstructions`](/en/settings#available-settings) is `false`. Explore and Plan skip it regardless.
 * **Preloaded skills**: full content of any skill named in the agent's [`skills` field](#preload-skills-into-subagents). Built-in agents don't preload skills.
+* **Sibling roster**: a system reminder listing `main` and every other named agent in the session, each a valid `to` value for [`SendMessage`](#resume-subagents). {/* min-version: 2.1.206 */}Requires Claude Code v2.1.206 or later. The roster appears only when the subagent's tools include `SendMessage` and at least one other agent has a name, whether Claude named it when spawning it or it runs as an [agent team](/en/agent-teams) teammate. It is a snapshot taken when the subagent starts, so agents named later don't appear.
 
 Explore and Plan are the only subagents that omit CLAUDE.md and git status. There is no frontmatter field or per-agent setting to change which agents skip them.
 
@@ -858,7 +884,9 @@ Continue that code review and now analyze the authorization logic
 [Claude resumes the subagent with full context from previous conversation]
 ```
 
-If a stopped subagent receives a `SendMessage`, it auto-resumes in the background without requiring a new `Agent` invocation.
+A completed subagent that receives a `SendMessage` auto-resumes in the background without a new `Agent` invocation. The same applies to a subagent that Claude stopped with the `TaskStop` tool.
+
+{/* min-version: 2.1.191 */}As of v2.1.191, a subagent you stopped yourself, with `x` in `/tasks` or an SDK `stop_task` request, doesn't auto-resume. The `SendMessage` call returns a refusal telling Claude the agent was cancelled. Type into that subagent's transcript in the subagent panel to resume it yourself, which clears the stop so later `SendMessage` calls can auto-resume it again.
 
 Resuming starts a new run of the agent under the same ID, so a subagent that had already failed or completed shows as running again in the task list and in the Agent SDK's task events. Before v2.1.205, it kept showing its earlier failed or completed status while the resumed run was working.
 

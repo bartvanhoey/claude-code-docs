@@ -174,7 +174,7 @@ const _ = {
 Wildcards (`*`) let you allow all tools from a server without listing each one individually.
 
 <Note>
-  **Prefer `allowedTools` over permission modes for MCP access.** `permissionMode: "acceptEdits"` does not auto-approve MCP tools (only file edits and filesystem Bash commands). `permissionMode: "bypassPermissions"` does auto-approve MCP tools but also disables other safety prompts unless an explicit [`ask` rule](/en/agent-sdk/permissions#how-permissions-are-evaluated) matches, which is broader than necessary. A wildcard in `allowedTools` grants exactly the MCP server you want and nothing more. See [Permission modes](/en/agent-sdk/permissions#permission-modes) for a full comparison.
+  **Prefer `allowedTools` over permission modes for MCP access.** `permissionMode: "acceptEdits"` does not auto-approve MCP tools (only file edits and filesystem Bash commands). `permissionMode: "bypassPermissions"` does auto-approve MCP tools but also disables most other safety prompts, which is broader than necessary; see [How permissions are evaluated](/en/agent-sdk/permissions#how-permissions-are-evaluated) for the prompts that remain. A wildcard in `allowedTools` grants exactly the MCP server you want and nothing more. See [Permission modes](/en/agent-sdk/permissions#permission-modes) for a full comparison.
 </Note>
 
 ### Discover available tools
@@ -331,6 +331,8 @@ For the streamable HTTP transport, use `"type": "http"` instead. In `.mcp.json` 
 
 Define custom tools directly in your application code instead of running a separate server process. See the [custom tools guide](/en/agent-sdk/custom-tools) for implementation details.
 
+{/* min-version: 2.1.210 */}An SDK MCP server registered by an [`initialize` control request](/en/agent-sdk/typescript#sdkcontrolinitializeresponse) begins connecting as soon as Claude Code processes the request.
+
 ## MCP tool search
 
 When you have many MCP tools configured, tool definitions can consume a significant portion of your context window. Tool search solves this by withholding tool definitions from context and loading only the ones Claude needs for each turn.
@@ -463,7 +465,9 @@ For HTTP and SSE servers, pass authentication headers directly in the server con
 
 ### OAuth2 authentication
 
-The [MCP specification supports OAuth 2.1](https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization) for authorization. The SDK doesn't handle OAuth flows automatically, but you can pass access tokens via headers after completing the OAuth flow in your application:
+The [MCP specification supports OAuth 2.1](https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization) for authorization. The SDK doesn't open a browser or run an interactive OAuth flow. When a configured server returns an authorization challenge and no stored token is available, the agent run continues without that server's tools, and the server is reported with status `needs-auth` in the `mcp_servers` array of the [system init message](/en/agent-sdk/typescript#sdksystemmessage). Check that array at startup if your agent depends on a specific server being connected.
+
+To supply credentials, complete the OAuth flow in your own application and pass the resulting access token in the server's `headers`:
 
 <CodeGroup>
   ```typescript TypeScript theme={null}
@@ -778,6 +782,10 @@ MCP server connections time out after 30 seconds by default. If your server take
 * Using a lighter-weight server if available
 * Pre-warming the server before starting your agent
 * Checking server logs for slow initialization causes
+
+### Tool output exceeds maximum allowed tokens
+
+The SDK applies the same MCP output limit as Claude Code. When a tool result is larger than 25,000 tokens, the full output is saved to a file and the tool result is replaced with an error message that names the file path, so the agent can read the output back in portions. Raise the limit with the [`MAX_MCP_OUTPUT_TOKENS`](/en/env-vars) environment variable. See [MCP output limits and warnings](/en/mcp#mcp-output-limits-and-warnings) for the full behavior, including how a server can declare a higher per-tool limit.
 
 ## Related resources
 
