@@ -29,6 +29,15 @@ jobs:
         echo "tag=v$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
+    - name: Verify installer version matches helper script
+      run: |
+        INSTALLER_VERSION=$(grep "^INSTALLER_VERSION=" install.sh | cut -d'"' -f2)
+        if [ "${{ steps.version.outputs.version }}" != "$INSTALLER_VERSION" ]; then
+          echo "::error::Version mismatch: scripts/claude-docs-helper.sh.template has SCRIPT_VERSION=${{ steps.version.outputs.version }} but install.sh has INSTALLER_VERSION=$INSTALLER_VERSION"
+          exit 1
+        fi
+        echo "Versions match: ${{ steps.version.outputs.version }}"
+
     - name: Check if release exists
       id: check_release
       run: |
