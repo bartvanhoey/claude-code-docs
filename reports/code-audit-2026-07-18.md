@@ -49,7 +49,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
 ### Security
 
 #### 🟢 Low Priority / Observations
-- `.github/workflows/update-docs.yml:91` uses `peter-evans/create-pull-request@v7` (third-party action, pinned to a mutable major-version tag rather than a commit SHA). `actions/checkout@v4`, `actions/setup-python@v5`, and `actions/github-script@v7` are GitHub-maintained and lower risk, but are also tag-pinned.
+- `.github/workflows/update-docs.yml:91` uses `peter-evans/create-pull-request@v7` (third-party action, pinned to a mutable major-version tag rather than a commit SHA). `actions/checkout@v4`, `actions/setup-python@v5`, and `actions/github-script@v7` are GitHub-maintained and lower risk, but are also tag-pinned. ✅ Fixed 2026-07-18 — pinned to `22a9089034f40e5a961c8808d113e2c98fb63676` (`v7.0.11`, resolved live via `gh api`), same commit as before
   - Impact: A compromised or re-tagged release of a tag-pinned action could inject arbitrary code into a workflow with `contents: write` / `pull-requests: write` permissions. Low likelihood (no incidents reported for these actions), but it's a standard supply-chain hardening gap.
   - Recommendation: Pin `peter-evans/create-pull-request` to a commit SHA (`@<sha> # v7.x.x`) as the highest-value change; official `actions/*` are optional.
   - Effort: 15 minutes.

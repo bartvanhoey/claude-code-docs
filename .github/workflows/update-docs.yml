@@ -88,7 +88,7 @@ jobs:
     - name: Create Pull Request if changed
       if: steps.verify-changed-files.outputs.changed == 'true' && steps.fetch-docs.outputs.fetch_failed != 'true'
       id: create-pr
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: ${{ steps.commit-msg.outputs.message }}
