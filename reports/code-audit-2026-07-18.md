@@ -38,7 +38,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
   - Recommendation: Delete the dead `case` branch, or delete the two regex pre-checks and let the `case` statement be the single source of truth (the regex blocks exist to also support space-containing multi-word args before sanitization, so keeping them and removing the dead `case` branch is the smaller change).
   - Effort: 30 minutes.
 
-- `scripts/claude-docs-helper.sh.template` — The "compare local HEAD to origin, report ahead/behind" logic is independently re-implemented three times: `auto_update()` (line 39), `show_freshness()` (line 71), and `read_doc()` (line 119). Each does its own `git fetch` + `git rev-parse` + `git rev-list --count`.
+- `scripts/claude-docs-helper.sh.template` — The "compare local HEAD to origin, report ahead/behind" logic is independently re-implemented three times: `auto_update()` (line 39), `show_freshness()` (line 71), and `read_doc()` (line 119). Each does its own `git fetch` + `git rev-parse` + `git rev-list --count`. ✅ Fixed 2026-07-18 — partial: added a `SYNC_DONE` flag so `read_doc()` skips its redundant fetch when `auto_update()` already ran; the three implementations still exist separately (full extraction into one shared helper was assessed as higher-risk and declined — see Performance finding below)
   - Impact: Triples the surface area for this logic to drift (e.g., a future fix to the ahead/behind message format only applied in one place).
   - Recommendation: Factor the fetch+compare into a single helper that returns ahead/behind counts, called by all three functions.
   - Effort: 1-2 hours.
@@ -59,7 +59,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
 ### Performance
 
 #### 🟡 Medium Priority
-- `scripts/claude-docs-helper.sh.template` — Running `/docs -t <topic>` triggers `show_freshness()` → `auto_update()` (one `git fetch`), then falls through to `read_doc()`, which does its own independent `git fetch` (line 146) to recompute the same ahead/behind state. Per the script's own comments, each fetch takes ~0.3-0.4s, so this combined command form pays that cost twice for no behavioral benefit.
+- `scripts/claude-docs-helper.sh.template` — Running `/docs -t <topic>` triggers `show_freshness()` → `auto_update()` (one `git fetch`), then falls through to `read_doc()`, which does its own independent `git fetch` (line 146) to recompute the same ahead/behind state. Per the script's own comments, each fetch takes ~0.3-0.4s, so this combined command form pays that cost twice for no behavioral benefit. ✅ Fixed 2026-07-18 — verified via a real git-repo simulation (fetch-call tracer): 2 fetches → 1 for the combined `-t <topic>` path; standalone `<topic>` path unchanged at 1 fetch
   - Impact: Roughly doubles perceived latency (~0.6-0.8s vs ~0.3-0.4s) specifically for the `-t <topic>` combined form; the plain `-t` and plain `<topic>` forms are unaffected.
   - Recommendation: Same fix as the Code Quality dedup finding above — a single shared fetch+compare call would eliminate the second network round-trip.
   - Effort: Covered by the 1-2 hour refactor above.

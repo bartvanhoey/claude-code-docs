@@ -12,6 +12,10 @@ SCRIPT_VERSION="0.3.4"
 DOCS_PATH="$HOME/.claude-code-docs"
 MANIFEST="$DOCS_PATH/docs/docs_manifest.json"
 
+# Set by auto_update() once a `git fetch` has run this invocation, so read_doc()
+# can skip a redundant second fetch when called right after show_freshness().
+SYNC_DONE=false
+
 # No colors since they don't work in terminal anyway
 
 # Sanitize a doc topic argument against path traversal.
@@ -65,6 +69,7 @@ auto_update() {
         git pull --quiet origin "$BRANCH" 2>&1 | grep -v "Merge made by" || true
     fi
 
+    SYNC_DONE=true
     return 0  # Success (either updated or already up-to-date)
 }
 
@@ -141,9 +146,15 @@ read_doc() {
         local BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
         local VERSION=$SCRIPT_VERSION
         
-        # Do the fetch to check status
         local COMPARE_BRANCH="$BRANCH"
-        if ! git fetch --quiet origin "$BRANCH" 2>/dev/null; then
+        if [[ "$SYNC_DONE" == true ]]; then
+            # auto_update() already fetched (and pulled, if behind) earlier in this
+            # invocation — skip the redundant network fetch and resolve the compare
+            # branch from local state only.
+            if ! git rev-parse --verify origin/"$BRANCH" >/dev/null 2>&1; then
+                COMPARE_BRANCH="main"
+            fi
+        elif ! git fetch --quiet origin "$BRANCH" 2>/dev/null; then
             # Try main if current branch doesn't exist on origin
             if git fetch --quiet origin main 2>/dev/null; then
                 COMPARE_BRANCH="main"
