@@ -78,7 +78,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
 ### Maintainability
 
 #### 🟢 Low Priority / Observations
-- Version numbers are tracked independently in two places with no automated sync check: `install.sh:9` (`INSTALLER_VERSION="0.3.4"`) and `scripts/claude-docs-helper.sh.template:9` (`SCRIPT_VERSION="0.3.4"`). `.github/workflows/release.yml:27` extracts its release tag from the template's `SCRIPT_VERSION` only, so `install.sh`'s version constant can silently drift without triggering a release or any warning.
+- Version numbers are tracked independently in two places with no automated sync check: `install.sh:9` (`INSTALLER_VERSION="0.3.4"`) and `scripts/claude-docs-helper.sh.template:9` (`SCRIPT_VERSION="0.3.4"`). `.github/workflows/release.yml:27` extracts its release tag from the template's `SCRIPT_VERSION` only, so `install.sh`'s version constant can silently drift without triggering a release or any warning. ✅ Fixed 2026-07-18 — added a CI verification step to `release.yml` that fails the workflow if the two versions diverge; verified against real repo state and a simulated mismatch
   - Recommendation: Low-cost fix — have `install.sh` source its version from the same file, or add a CI check that fails if the two differ. Not urgent since the values happen to match today.
   - Effort: 30 minutes.
 
