@@ -76,6 +76,14 @@ jobs:
         fi
         
         echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+
+        # GitHub PR titles are capped at 256 characters (commit messages have no such
+        # limit), so derive a truncated title separately instead of reusing COMMIT_MSG.
+        PR_TITLE="$COMMIT_MSG"
+        if [ ${#PR_TITLE} -gt 256 ]; then
+          PR_TITLE="${PR_TITLE:0:253}..."
+        fi
+        echo "title=$PR_TITLE" >> $GITHUB_OUTPUT
     
     - name: Create Pull Request if changed
       if: steps.verify-changed-files.outputs.changed == 'true' && steps.fetch-docs.outputs.fetch_failed != 'true'
@@ -84,7 +92,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: ${{ steps.commit-msg.outputs.message }}
-        title: ${{ steps.commit-msg.outputs.message }}
+        title: ${{ steps.commit-msg.outputs.title }}
         body: |
           Automated documentation update from the scheduled `update-docs` workflow.
 
