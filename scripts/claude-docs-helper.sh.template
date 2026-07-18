@@ -335,19 +335,6 @@ fi
 
 # Main command handling
 case "${1:-}" in
-    -t|--check)
-        show_freshness
-        # Check if remaining args form "what's new"
-        shift
-        remaining_args="$*"
-        if [[ "$remaining_args" =~ ^what.?s?[[:space:]]?new.*$ ]]; then
-            echo ""
-            whats_new
-        elif [[ -n "$remaining_args" ]]; then
-            echo ""
-            read_doc "$(sanitize_input "$remaining_args")"
-        fi
-        ;;
     hook-check)
         hook_check
         ;;

@@ -22,7 +22,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
 ### Architecture & Design
 
 #### 🟡 Medium Priority
-- `install.sh:82-231` — Legacy-installation migration logic (`find_existing_installations`, `migrate_installation`) exists to handle a one-time upgrade path from pre-v0.3 installs (custom install locations, v0.1/v0.2 command file formats). This is permanent complexity carried indefinitely for what should be a shrinking population of very old installs.
+- `install.sh:82-231` — Legacy-installation migration logic (`find_existing_installations`, `migrate_installation`) exists to handle a one-time upgrade path from pre-v0.3 installs (custom install locations, v0.1/v0.2 command file formats). This is permanent complexity carried indefinitely for what should be a shrinking population of very old installs. ❭ Won't fix — sunset timing is a product decision, not a code fix
   - Impact: Adds ~150 lines of regex-based config parsing that every future contributor has to understand, for a migration path that presumably has few remaining users at this point.
   - Recommendation: Consider a sunset date (e.g., "remove migration path in v0.5") documented in a comment, or gate it behind a lighter-weight one-time check.
   - Effort: 2-3 hours to add a sunset plan; larger effort to actually remove it later.
@@ -33,7 +33,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
 ### Code Quality
 
 #### 🟡 Medium Priority
-- `scripts/claude-docs-helper.sh.template:312-350` — The `-t|--check` branch of the final `case "${1:-}" in` statement (line 338) is **unreachable dead code**. Any input starting with `-t` or `--check` is already caught and `exit 0`'d by the two regex blocks immediately above (lines 312 and 323), so execution never reaches the `case` statement for those inputs.
+- `scripts/claude-docs-helper.sh.template:312-350` — The `-t|--check` branch of the final `case "${1:-}" in` statement (line 338) is **unreachable dead code**. Any input starting with `-t` or `--check` is already caught and `exit 0`'d by the two regex blocks immediately above (lines 312 and 323), so execution never reaches the `case` statement for those inputs. ✅ Fixed 2026-07-18
   - Impact: A future editor who modifies the `case` branch (e.g., to add a new flag behavior) will see no effect and waste time debugging, since the regex blocks silently win. The two implementations can also drift out of sync — they already duplicate the "check for what's-new suffix, else read a doc" logic independently.
   - Recommendation: Delete the dead `case` branch, or delete the two regex pre-checks and let the `case` statement be the single source of truth (the regex blocks exist to also support space-containing multi-word args before sanitization, so keeping them and removing the dead `case` branch is the smaller change).
   - Effort: 30 minutes.
@@ -70,7 +70,7 @@ Two prior reports exist (`reports/code-audit-2026-06-30.md`, `reports/health-aud
 ### Testing
 
 #### 🔴 High Priority
-- No automated tests exist anywhere in the repo — not for `install.sh`, `uninstall.sh`, `scripts/claude-docs-helper.sh.template`, or `scripts/fetch_claude_docs.py`. No `shellcheck` or `pytest` step runs in CI.
+- No automated tests exist anywhere in the repo — not for `install.sh`, `uninstall.sh`, `scripts/claude-docs-helper.sh.template`, or `scripts/fetch_claude_docs.py`. No `shellcheck` or `pytest` step runs in CI. ❭ Won't fix — carried forward from 2026-06-30 decision
   - Impact: `install.sh` and `uninstall.sh` perform destructive, hard-to-reverse operations (`git reset --hard`, `git clean -fd`, `rm -rf`, rewriting `~/.claude/settings.json`) directly on user machines via the `curl | bash` install path. A regression here is invisible until a user reports broken state on their own system — there is no safety net between "author makes a change" and "it runs on someone's machine."
   - Recommendation: This exact finding was raised in `reports/code-audit-2026-06-30.md` and marked "Won't fix" — noting that decision stands, not re-litigating it. If priorities change, a `shellcheck` CI step alone (no new test framework) would catch a meaningful share of bash bugs for near-zero ongoing cost.
   - Effort: `shellcheck` CI step: ~1 hour. Full bats-core test suite: 2-3 days (per the prior report's estimate, unchanged).
