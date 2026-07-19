@@ -240,6 +240,87 @@ migrate_installation() {
 }
 
 # Function to safely update git repository
+# Determine what kind of local changes exist in the current repo (merge conflicts,
+# uncommitted changes, untracked files — ignoring expected docs_manifest.json churn),
+# so the caller knows whether to prompt before discarding them. Bash has no multi-value
+# return, so this relies on dynamic scoping: it assigns to has_conflicts,
+# has_local_changes, has_untracked, and needs_user_confirmation without declaring them
+# local itself, so the assignments land in the caller's already-declared local vars
+# (see the call site in safe_git_update()).
+detect_local_changes() {
+    has_conflicts=false
+    has_local_changes=false
+    has_untracked=false
+    needs_user_confirmation=false
+
+    # Check for merge conflicts (but ignore conflicts on docs_manifest.json - that's expected)
+    local non_manifest_conflicts=$(git status --porcelain | grep "^UU\|^AA\|^DD" | grep -v "docs/docs_manifest.json" 2>/dev/null)
+    if [[ -n "$non_manifest_conflicts" ]]; then
+        has_conflicts=true
+        needs_user_confirmation=true
+    fi
+
+    # Check for uncommitted changes (but ignore docs_manifest.json - that's expected)
+    local non_manifest_changes=$(git status --porcelain | grep -v "docs/docs_manifest.json" 2>/dev/null)
+    if [[ -n "$non_manifest_changes" ]]; then
+        has_local_changes=true
+        needs_user_confirmation=true
+    fi
+
+    # Check for untracked files (but ignore common temp files)
+    if git status --porcelain | grep "^??" | grep -v -E "\.(tmp|log|swp)$" | grep -q . 2>/dev/null; then
+        has_untracked=true
+        needs_user_confirmation=true
+    fi
+}
+
+# Ask the user to confirm discarding local changes when detect_local_changes() found
+# something worth confirming; auto-proceeds (with an informational message) when the
+# only local change is the expected docs_manifest.json churn. Reads has_conflicts,
+# has_local_changes, has_untracked, and needs_user_confirmation from the caller's scope
+# (see detect_local_changes() for why). Returns 1 if the user declined.
+confirm_discard_changes() {
+    if [[ "$needs_user_confirmation" == "true" ]]; then
+        echo ""
+        echo "⚠️  WARNING: Local changes detected in your installation:"
+        if [[ "$has_conflicts" == "true" ]]; then
+            echo "  • Merge conflicts need resolution"
+        fi
+        if [[ "$has_local_changes" == "true" ]]; then
+            echo "  • Modified files (other than docs_manifest.json)"
+        fi
+        if [[ "$has_untracked" == "true" ]]; then
+            echo "  • Untracked files"
+        fi
+        echo ""
+        echo "The installer will reset to a clean state, discarding these changes."
+        echo "Note: Changes to docs_manifest.json are handled automatically."
+        echo ""
+        read -p "Continue and discard local changes? [y/N]: " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installation cancelled. Your local changes are preserved."
+            echo "To proceed later, either:"
+            echo "  1. Manually resolve the issues, or"
+            echo "  2. Run the installer again and choose 'y' to discard changes"
+            return 1
+        fi
+        echo "  Proceeding with clean installation..."
+    else
+        # If only manifest changes/conflicts (or no changes), proceed silently
+        local manifest_only_changes=$(git status --porcelain | grep "docs/docs_manifest.json" 2>/dev/null)
+        if [[ -n "$manifest_only_changes" ]]; then
+            local conflict_type=$(echo "$manifest_only_changes" | grep "^UU")
+            if [[ -n "$conflict_type" ]]; then
+                echo "  Resolving manifest file conflicts automatically..."
+            else
+                echo "  Handling manifest file updates automatically..."
+            fi
+        fi
+    fi
+    return 0
+}
+
 safe_git_update() {
     local repo_dir="$1"
     pushd "$repo_dir" >/dev/null
@@ -290,71 +371,14 @@ safe_git_update() {
         local needs_user_confirmation=false
     else
         # Check what kind of changes we have (only when staying on same branch)
-        local has_conflicts=false
-        local has_local_changes=false
-        local has_untracked=false
-        local needs_user_confirmation=false
-        
-        # Check for merge conflicts (but ignore conflicts on docs_manifest.json - that's expected)
-        local non_manifest_conflicts=$(git status --porcelain | grep "^UU\|^AA\|^DD" | grep -v "docs/docs_manifest.json" 2>/dev/null)
-        if [[ -n "$non_manifest_conflicts" ]]; then
-            has_conflicts=true
-            needs_user_confirmation=true
-        fi
-        
-        # Check for uncommitted changes (but ignore docs_manifest.json - that's expected)
-        local non_manifest_changes=$(git status --porcelain | grep -v "docs/docs_manifest.json" 2>/dev/null)
-        if [[ -n "$non_manifest_changes" ]]; then
-            has_local_changes=true
-            needs_user_confirmation=true
-        fi
-        
-        # Check for untracked files (but ignore common temp files)
-        if git status --porcelain | grep "^??" | grep -v -E "\.(tmp|log|swp)$" | grep -q . 2>/dev/null; then
-            has_untracked=true
-            needs_user_confirmation=true
-        fi
+        local has_conflicts has_local_changes has_untracked needs_user_confirmation
+        detect_local_changes
     fi
     
     # If we have significant changes, ask user for confirmation
-    if [[ "$needs_user_confirmation" == "true" ]]; then
-        echo ""
-        echo "⚠️  WARNING: Local changes detected in your installation:"
-        if [[ "$has_conflicts" == "true" ]]; then
-            echo "  • Merge conflicts need resolution"
-        fi
-        if [[ "$has_local_changes" == "true" ]]; then
-            echo "  • Modified files (other than docs_manifest.json)"
-        fi
-        if [[ "$has_untracked" == "true" ]]; then
-            echo "  • Untracked files"
-        fi
-        echo ""
-        echo "The installer will reset to a clean state, discarding these changes."
-        echo "Note: Changes to docs_manifest.json are handled automatically."
-        echo ""
-        read -p "Continue and discard local changes? [y/N]: " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "Installation cancelled. Your local changes are preserved."
-            echo "To proceed later, either:"
-            echo "  1. Manually resolve the issues, or"
-            echo "  2. Run the installer again and choose 'y' to discard changes"
-            popd >/dev/null
-            return 1
-        fi
-        echo "  Proceeding with clean installation..."
-    else
-        # If only manifest changes/conflicts (or no changes), proceed silently
-        local manifest_only_changes=$(git status --porcelain | grep "docs/docs_manifest.json" 2>/dev/null)
-        if [[ -n "$manifest_only_changes" ]]; then
-            local conflict_type=$(echo "$manifest_only_changes" | grep "^UU")
-            if [[ -n "$conflict_type" ]]; then
-                echo "  Resolving manifest file conflicts automatically..."
-            else
-                echo "  Handling manifest file updates automatically..."
-            fi
-        fi
+    if ! confirm_discard_changes; then
+        popd >/dev/null
+        return 1
     fi
     
     # Force clean state - handle any conflicts, merges, or messy states
@@ -370,7 +394,14 @@ safe_git_update() {
     
     # Clear any stale index
     git reset >/dev/null 2>&1 || true
-    
+
+    # Discard uncommitted working-tree changes before switching branches below.
+    # `git checkout -B` refuses to run if it would overwrite uncommitted changes to
+    # a tracked file — this reset (no ref = current HEAD) clears that risk without
+    # moving any branch pointer, so it's safe regardless of whether we're switching
+    # branches or staying on the same one.
+    git reset --hard >/dev/null 2>&1 || true
+
     # Force checkout target branch (handles detached HEAD, wrong branch, etc.)
     git checkout -B "$target_branch" "origin/$target_branch" >/dev/null 2>&1
     
