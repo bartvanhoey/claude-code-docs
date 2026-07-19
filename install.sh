@@ -349,8 +349,11 @@ safe_git_update() {
     
     # Note: Old v0.3.1 upgrade logic removed - new branch switching logic handles all cases
     
-    # Try regular pull first (use target branch)
-    if git pull --quiet origin "$target_branch" 2>/dev/null; then
+    # Try regular pull first (use target branch) — only when already on it.
+    # `git pull origin X` merges into whatever branch is currently checked out; it
+    # does not switch branches. Attempting it while on a different branch could
+    # succeed and report success while silently leaving the repo on the wrong branch.
+    if [[ "$current_branch" == "$target_branch" ]] && git pull --quiet origin "$target_branch" 2>/dev/null; then
         popd >/dev/null
         return 0
     fi

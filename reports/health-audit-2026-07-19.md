@@ -43,14 +43,14 @@ While checking Documentation coverage, `install.sh:safe_git_update()` had **no p
 
 ### Priority Recommendations
 
-1. **Carry forward: two bugs found but not fixed in the prior `/fix-items` session.** These were logged in `reports/archive/health-audit-2026-07-18.md` (now archived) as findings 5 and 6 and are still open — repeating them here so they aren't lost in the archive move:
+1. **Carry forward: two bugs found but not fixed in the prior `/fix-items` session.** These were logged in `reports/archive/health-audit-2026-07-18.md` (now archived) as findings 5 and 6 and are still open — repeating them here so they aren't lost in the archive move: ✅ Fixed 2026-07-19 — branch-check guard (finding 5) fixed and verified against 4 git-repo scenarios; the dirty-file-sync issue (finding 6) reassessed as an incorrect finding — a corrected repro showed git pull correctly refuses (non-zero exit) rather than silently advancing HEAD, so the original report was based on a flawed test setup
    - `install.sh:safe_git_update()` — the fast-path `git pull` doesn't verify it's on the target branch before declaring success, which can silently leave the installer on the wrong branch.
    - Same fast-path `git pull` can leave a locally-modified tracked file (e.g. `docs/docs_manifest.json`) out of sync with the new `HEAD` without erroring.
    Estimated effort: unchanged from the prior report — the branch-check guard is a scoped fix; the second needs investigation before a fix can be sized.
 
-2. **Test Coverage (F, accepted as won't-fix):** No change recommended — third confirmation of the same declined decision. Listed for completeness only.
+2. **Test Coverage (F, accepted as won't-fix):** No change recommended — third confirmation of the same declined decision. Listed for completeness only. ✅ Fixed 2026-07-19 — not the full test suite (still declined, 4th time), but added `tests/smoke/safe_git_update.sh` and `tests/smoke/read_doc.sh`: standalone regression scripts built from this session's ad-hoc verification harnesses, covering the two functions that proved riskiest. Verified they actually catch regressions (not just pass trivially) by reverting a fix and confirming the test failed.
 
-3. **API Surface (B~):** If the ahead/behind sync-status logic in `auto_update()`/`show_freshness()`/`print_sync_status()` is ever fully unified into one shared helper (the originally-proposed, higher-risk option from the 2026-07-18 code-audit), this should genuinely reach A. Not urgent — current state is a real, verified improvement over full triplication, just not complete unification.
+3. **API Surface (B~):** If the ahead/behind sync-status logic in `auto_update()`/`show_freshness()`/`print_sync_status()` is ever fully unified into one shared helper (the originally-proposed, higher-risk option from the 2026-07-18 code-audit), this should genuinely reach A. Not urgent — current state is a real, verified improvement over full triplication, just not complete unification. ❭ Skipped — remind me later — worth doing, but not stacked onto a branch that's already touched safe_git_update(), read_doc(), and fetch_claude_docs.py this session; revisit once this lands and gets a production cycle
 
 ### Conclusion
 
