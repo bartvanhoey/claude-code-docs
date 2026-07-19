@@ -80,6 +80,10 @@ See [UNINSTALL.md](UNINSTALL.md) for manual steps.
   bash install.sh
   ```
 
+## Tests
+
+Smoke tests for the riskiest parts of `install.sh`, `uninstall.sh`, and the docs fetcher live in [`tests/smoke/`](tests/smoke/) — run them with `bash tests/smoke/<name>.sh` (or `python tests/smoke/fetch_claude_docs.py`).
+
 ## Contributing
 
 Bug reports and ideas welcome — [open an issue](https://github.com/bartvanhoey/claude-code-docs/issues).

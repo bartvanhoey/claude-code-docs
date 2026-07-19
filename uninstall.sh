@@ -43,11 +43,15 @@ find_all_installations() {
             if [[ "$line" =~ Execute:.*claude-code-docs ]]; then
                 local path=$(echo "$line" | grep -o '[^ "]*claude-code-docs[^ "]*' | head -1)
                 path="${path/#\~/$HOME}"
-                
-                # Get directory part
+                # docs-command.md.template embeds a literal, unexpanded "$HOME" (it's
+                # copied verbatim, never variable-substituted) — expand that too.
+                path="${path/#\$HOME/$HOME}"
+
+                # Get directory part. Real installs live at "$HOME/.claude-code-docs"
+                # (leading dot), so the basename check must allow an optional dot.
                 if [[ -d "$path" ]]; then
                     paths+=("$path")
-                elif [[ -d "$(dirname "$path")" ]] && [[ "$(basename "$(dirname "$path")")" == "claude-code-docs" ]]; then
+                elif [[ -d "$(dirname "$path")" ]] && [[ "$(basename "$(dirname "$path")")" =~ ^\.?claude-code-docs$ ]]; then
                     paths+=("$(dirname "$path")")
                 fi
             fi
@@ -63,8 +67,9 @@ find_all_installations() {
                 while IFS= read -r path; do
                     [[ -z "$path" ]] && continue
                     path="${path/#\~/$HOME}"
-                    # Clean up path to get the claude-code-docs directory
-                    if [[ "$path" =~ (.*/claude-code-docs)(/.*)?$ ]]; then
+                    # Clean up path to get the claude-code-docs directory. Real installs
+                    # live at "$HOME/.claude-code-docs" (leading dot), so allow that.
+                    if [[ "$path" =~ (.*/\.?claude-code-docs)(/.*)?$ ]]; then
                         path="${BASH_REMATCH[1]}"
                     fi
                     [[ -d "$path" ]] && paths+=("$path")
