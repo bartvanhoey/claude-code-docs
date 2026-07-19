@@ -469,6 +469,145 @@ def cleanup_old_files(docs_dir: Path, current_files: Set[str], manifest: dict) -
             file_path.unlink()
 
 
+def fetch_all_pages(documentation_pages, session, base_url, manifest, docs_dir):
+    """
+    Fetch each discovered documentation page and build its manifest entry.
+    Returns (new_manifest_files, fetched_files, successful, failed, failed_pages).
+    """
+    new_manifest_files = {}
+    fetched_files = set()
+    successful = 0
+    failed = 0
+    failed_pages = []
+
+    for i, page_path in enumerate(documentation_pages, 1):
+        logger.info(f"Processing {i}/{len(documentation_pages)}: {page_path}")
+
+        try:
+            filename, content = fetch_markdown_content(page_path, session, base_url)
+
+            # Check if content has changed
+            old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
+            old_entry = manifest.get("files", {}).get(filename, {})
+
+            if content_has_changed(content, old_hash):
+                content_hash = save_markdown_file(docs_dir, filename, content)
+                logger.info(f"Updated: {filename}")
+                # Only update timestamp when content actually changes
+                last_updated = datetime.now().isoformat()
+            else:
+                content_hash = old_hash
+                logger.info(f"Unchanged: {filename}")
+                # Keep existing timestamp for unchanged files
+                last_updated = old_entry.get("last_updated", datetime.now().isoformat())
+
+            new_manifest_files[filename] = {
+                "original_url": f"{base_url}{page_path}",
+                "original_md_url": f"{base_url}{page_path}.md",
+                "hash": content_hash,
+                "last_updated": last_updated
+            }
+
+            fetched_files.add(filename)
+            successful += 1
+
+            # Rate limiting
+            if i < len(documentation_pages):
+                time.sleep(RATE_LIMIT_DELAY)
+
+        except Exception as e:
+            logger.error(f"Failed to process {page_path}: {e}")
+            failed += 1
+            failed_pages.append(page_path)
+
+    return new_manifest_files, fetched_files, successful, failed, failed_pages
+
+
+def fetch_and_record_changelog(session, manifest, docs_dir):
+    """
+    Fetch the Claude Code changelog and build its manifest entry.
+    Returns (manifest_entry_or_None, filename_or_None, success).
+    """
+    logger.info("Fetching Claude Code changelog...")
+    try:
+        filename, content = fetch_changelog(session)
+
+        # Check if content has changed
+        old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
+        old_entry = manifest.get("files", {}).get(filename, {})
+
+        if content_has_changed(content, old_hash):
+            content_hash = save_markdown_file(docs_dir, filename, content)
+            logger.info(f"Updated: {filename}")
+            last_updated = datetime.now().isoformat()
+        else:
+            content_hash = old_hash
+            logger.info(f"Unchanged: {filename}")
+            last_updated = old_entry.get("last_updated", datetime.now().isoformat())
+
+        entry = {
+            "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
+            "hash": content_hash,
+            "last_updated": last_updated,
+            "source": "claude-code-repository"
+        }
+        return entry, filename, True
+
+    except Exception as e:
+        logger.error(f"Failed to fetch changelog: {e}")
+        return None, None, False
+
+
+def finalize_run(docs_dir, new_manifest, fetched_files, documentation_pages, successful,
+                  failed, failed_pages, sitemap_url, base_url, start_time, manifest):
+    """
+    Clean up obsolete files, finalize and save the manifest, print the run summary,
+    and exit(1) if any real documentation page failed to fetch.
+    """
+    # Clean up old files (only those we previously fetched)
+    cleanup_old_files(docs_dir, fetched_files, manifest)
+
+    # Add metadata to manifest
+    new_manifest["fetch_metadata"] = {
+        "last_fetch_completed": datetime.now().isoformat(),
+        "fetch_duration_seconds": (datetime.now() - start_time).total_seconds(),
+        "total_pages_discovered": len(documentation_pages),
+        "pages_fetched_successfully": successful,
+        "pages_failed": failed,
+        "failed_pages": failed_pages,
+        "sitemap_url": sitemap_url,
+        "base_url": base_url,
+        "total_files": len(fetched_files),
+        "fetch_tool_version": "3.0"
+    }
+
+    # Save new manifest
+    save_manifest(docs_dir, new_manifest)
+
+    # Summary
+    duration = datetime.now() - start_time
+    logger.info("\n" + "="*50)
+    logger.info(f"Fetch completed in {duration}")
+    logger.info(f"Discovered pages: {len(documentation_pages)}")
+    logger.info(f"Successful: {successful}/{len(documentation_pages)}")
+    logger.info(f"Failed: {failed}")
+
+    if failed_pages:
+        logger.warning("\nFailed pages (will retry next run):")
+        for page in failed_pages:
+            logger.warning(f"  - {page}")
+        # Fail the run whenever any real documentation page failed to fetch,
+        # not just when every single fetch (including the unrelated changelog
+        # fetch) failed — otherwise a lone changelog success silently masks a
+        # total documentation fetch failure.
+        if failed > 0:
+            logger.error(f"{failed} documentation page(s) failed to fetch!")
+            sys.exit(1)
+    else:
+        logger.info("\nAll pages fetched successfully!")
+
+
 def main():
     """Main function with improved robustness."""
     start_time = datetime.now()
@@ -534,121 +673,27 @@ def main():
             sys.exit(1)
         
         # Fetch each discovered page
-        for i, page_path in enumerate(documentation_pages, 1):
-            logger.info(f"Processing {i}/{len(documentation_pages)}: {page_path}")
-            
-            try:
-                filename, content = fetch_markdown_content(page_path, session, base_url)
-                
-                # Check if content has changed
-                old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
-                old_entry = manifest.get("files", {}).get(filename, {})
-                
-                if content_has_changed(content, old_hash):
-                    content_hash = save_markdown_file(docs_dir, filename, content)
-                    logger.info(f"Updated: {filename}")
-                    # Only update timestamp when content actually changes
-                    last_updated = datetime.now().isoformat()
-                else:
-                    content_hash = old_hash
-                    logger.info(f"Unchanged: {filename}")
-                    # Keep existing timestamp for unchanged files
-                    last_updated = old_entry.get("last_updated", datetime.now().isoformat())
-                
-                new_manifest["files"][filename] = {
-                    "original_url": f"{base_url}{page_path}",
-                    "original_md_url": f"{base_url}{page_path}.md",
-                    "hash": content_hash,
-                    "last_updated": last_updated
-                }
-                
-                fetched_files.add(filename)
-                successful += 1
-                
-                # Rate limiting
-                if i < len(documentation_pages):
-                    time.sleep(RATE_LIMIT_DELAY)
-                    
-            except Exception as e:
-                logger.error(f"Failed to process {page_path}: {e}")
-                failed += 1
-                failed_pages.append(page_path)
+        page_files, page_fetched, page_successful, page_failed, page_failed_pages = fetch_all_pages(
+            documentation_pages, session, base_url, manifest, docs_dir
+        )
+        new_manifest["files"].update(page_files)
+        fetched_files.update(page_fetched)
+        successful += page_successful
+        failed += page_failed
+        failed_pages.extend(page_failed_pages)
 
         # Fetch Claude Code changelog
-        logger.info("Fetching Claude Code changelog...")
-        try:
-            filename, content = fetch_changelog(session)
-
-            # Check if content has changed
-            old_hash = manifest.get("files", {}).get(filename, {}).get("hash", "")
-            old_entry = manifest.get("files", {}).get(filename, {})
-
-            if content_has_changed(content, old_hash):
-                content_hash = save_markdown_file(docs_dir, filename, content)
-                logger.info(f"Updated: {filename}")
-                last_updated = datetime.now().isoformat()
-            else:
-                content_hash = old_hash
-                logger.info(f"Unchanged: {filename}")
-                last_updated = old_entry.get("last_updated", datetime.now().isoformat())
-
-            new_manifest["files"][filename] = {
-                "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
-                "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-                "hash": content_hash,
-                "last_updated": last_updated,
-                "source": "claude-code-repository"
-            }
-
-            fetched_files.add(filename)
+        changelog_entry, changelog_filename, changelog_ok = fetch_and_record_changelog(session, manifest, docs_dir)
+        if changelog_ok:
+            new_manifest["files"][changelog_filename] = changelog_entry
+            fetched_files.add(changelog_filename)
             successful += 1
-
-        except Exception as e:
-            logger.error(f"Failed to fetch changelog: {e}")
+        else:
             failed += 1
             failed_pages.append("changelog")
 
-    # Clean up old files (only those we previously fetched)
-    cleanup_old_files(docs_dir, fetched_files, manifest)
-    
-    # Add metadata to manifest
-    new_manifest["fetch_metadata"] = {
-        "last_fetch_completed": datetime.now().isoformat(),
-        "fetch_duration_seconds": (datetime.now() - start_time).total_seconds(),
-        "total_pages_discovered": len(documentation_pages),
-        "pages_fetched_successfully": successful,
-        "pages_failed": failed,
-        "failed_pages": failed_pages,
-        "sitemap_url": sitemap_url,
-        "base_url": base_url,
-        "total_files": len(fetched_files),
-        "fetch_tool_version": "3.0"
-    }
-    
-    # Save new manifest
-    save_manifest(docs_dir, new_manifest)
-    
-    # Summary
-    duration = datetime.now() - start_time
-    logger.info("\n" + "="*50)
-    logger.info(f"Fetch completed in {duration}")
-    logger.info(f"Discovered pages: {len(documentation_pages)}")
-    logger.info(f"Successful: {successful}/{len(documentation_pages)}")
-    logger.info(f"Failed: {failed}")
-    
-    if failed_pages:
-        logger.warning("\nFailed pages (will retry next run):")
-        for page in failed_pages:
-            logger.warning(f"  - {page}")
-        # Fail the run whenever any real documentation page failed to fetch,
-        # not just when every single fetch (including the unrelated changelog
-        # fetch) failed — otherwise a lone changelog success silently masks a
-        # total documentation fetch failure.
-        if failed > 0:
-            logger.error(f"{failed} documentation page(s) failed to fetch!")
-            sys.exit(1)
-    else:
-        logger.info("\nAll pages fetched successfully!")
+    finalize_run(docs_dir, new_manifest, fetched_files, documentation_pages, successful,
+                 failed, failed_pages, sitemap_url, base_url, start_time, manifest)
 
 
 if __name__ == "__main__":

@@ -120,6 +120,61 @@ show_freshness() {
     echo "📦 Version: ${SCRIPT_VERSION}"
 }
 
+# Print git sync status for the docs repo (pulling if behind) before a doc is shown.
+# Skips the network fetch if one already ran this invocation (see SYNC_DONE). On total
+# fetch failure, prints its own cached-docs fallback (including the doc content) and
+# returns 1 so the caller knows not to print the content/footer again.
+print_sync_status() {
+    local topic="$1"
+    local doc_path="$2"
+    local BRANCH VERSION COMPARE_BRANCH
+    BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+    VERSION=$SCRIPT_VERSION
+    COMPARE_BRANCH="$BRANCH"
+
+    if [[ "$SYNC_DONE" == true ]]; then
+        # auto_update() already fetched (and pulled, if behind) earlier in this
+        # invocation — skip the redundant network fetch and resolve the compare
+        # branch from local state only.
+        if ! git rev-parse --verify origin/"$BRANCH" >/dev/null 2>&1; then
+            COMPARE_BRANCH="main"
+        fi
+    elif ! git fetch --quiet origin "$BRANCH" 2>/dev/null; then
+        # Try main if current branch doesn't exist on origin
+        if git fetch --quiet origin main 2>/dev/null; then
+            COMPARE_BRANCH="main"
+        else
+            echo "⚠️  Could not check GitHub for updates - using cached docs (v$VERSION, $BRANCH)"
+            echo ""
+            cat "$doc_path"
+            echo ""
+            echo "📖 Official page: https://docs.anthropic.com/en/docs/claude-code/$topic"
+            return 1
+        fi
+    fi
+
+    local LOCAL REMOTE BEHIND
+    LOCAL=$(git rev-parse HEAD 2>/dev/null)
+    REMOTE=$(git rev-parse origin/"$COMPARE_BRANCH" 2>/dev/null)
+    BEHIND=$(git rev-list HEAD..origin/"$COMPARE_BRANCH" --count 2>/dev/null || echo "0")
+
+    if [[ "$LOCAL" != "$REMOTE" ]] && [[ "$BEHIND" -gt 0 ]]; then
+        # We're behind - safe to update
+        echo "🔄 Updating to latest documentation..."
+        git pull --quiet origin "$COMPARE_BRANCH" 2>&1 | grep -v "Merge made by" || true
+        echo "✅ Updated to latest (v$VERSION, $BRANCH)"
+    else
+        local AHEAD
+        AHEAD=$(git rev-list origin/"$COMPARE_BRANCH"..HEAD --count 2>/dev/null || echo "0")
+        if [[ "$AHEAD" -gt 0 ]]; then
+            echo "⚠️  Using local development version (v$VERSION, $BRANCH, +$AHEAD commits)"
+        else
+            echo "✅ You have the latest docs (v$VERSION, $BRANCH)"
+        fi
+    fi
+    return 0
+}
+
 # Function to read documentation
 read_doc() {
     local topic=$(sanitize_input "$1")
@@ -140,53 +195,15 @@ read_doc() {
     
     if [[ -f "$doc_path" ]]; then
         print_doc_header
-        
+
         # Quick check if we're up to date (0.37s)
         cd "$DOCS_PATH" 2>/dev/null || exit 1
-        local BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
-        local VERSION=$SCRIPT_VERSION
-        
-        local COMPARE_BRANCH="$BRANCH"
-        if [[ "$SYNC_DONE" == true ]]; then
-            # auto_update() already fetched (and pulled, if behind) earlier in this
-            # invocation — skip the redundant network fetch and resolve the compare
-            # branch from local state only.
-            if ! git rev-parse --verify origin/"$BRANCH" >/dev/null 2>&1; then
-                COMPARE_BRANCH="main"
-            fi
-        elif ! git fetch --quiet origin "$BRANCH" 2>/dev/null; then
-            # Try main if current branch doesn't exist on origin
-            if git fetch --quiet origin main 2>/dev/null; then
-                COMPARE_BRANCH="main"
-            else
-                echo "⚠️  Could not check GitHub for updates - using cached docs (v$VERSION, $BRANCH)"
-                echo ""
-                cat "$doc_path"
-                echo ""
-                echo "📖 Official page: https://docs.anthropic.com/en/docs/claude-code/$topic"
-                return
-            fi
-        fi
-        
-        local LOCAL=$(git rev-parse HEAD 2>/dev/null)
-        local REMOTE=$(git rev-parse origin/"$COMPARE_BRANCH" 2>/dev/null)
-        local BEHIND=$(git rev-list HEAD..origin/"$COMPARE_BRANCH" --count 2>/dev/null || echo "0")
-        
-        if [[ "$LOCAL" != "$REMOTE" ]] && [[ "$BEHIND" -gt 0 ]]; then
-            # We're behind - safe to update
-            echo "🔄 Updating to latest documentation..."
-            git pull --quiet origin "$COMPARE_BRANCH" 2>&1 | grep -v "Merge made by" || true
-            echo "✅ Updated to latest (v$VERSION, $BRANCH)"
-        else
-            local AHEAD=$(git rev-list origin/"$COMPARE_BRANCH"..HEAD --count 2>/dev/null || echo "0")
-            if [[ "$AHEAD" -gt 0 ]]; then
-                echo "⚠️  Using local development version (v$VERSION, $BRANCH, +$AHEAD commits)"
-            else
-                echo "✅ You have the latest docs (v$VERSION, $BRANCH)"
-            fi
+
+        if ! print_sync_status "$topic" "$doc_path"; then
+            return
         fi
         echo ""
-        
+
         cat "$doc_path"
         echo ""
         if [[ "$topic" == "changelog" ]]; then
