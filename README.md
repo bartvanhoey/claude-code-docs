@@ -8,11 +8,11 @@ A local, auto-updating mirror of the [Claude Code docs](https://docs.anthropic.c
 
 ## Health Audit
 
-**Last assessed:** 2026-07-18 | **Overall:** 3.0 — Good
+**Last assessed:** 2026-07-19 | **Overall:** 3.375 — Good
 
-Build A · Quality D? · Architecture A · Tests F · Dead Code A · API B~ · Security A · Docs A
+Build A · Quality A · Architecture A · Tests F · Dead Code A · API B~ · Security A · Docs A
 
-> Full report: [reports/health-audit-2026-07-18.md](reports/health-audit-2026-07-18.md)
+> Full report: [reports/health-audit-2026-07-19.md](reports/health-audit-2026-07-19.md)
 
 ## Why
 

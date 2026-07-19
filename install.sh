@@ -239,7 +239,6 @@ migrate_installation() {
     echo "✅ Migration complete!"
 }
 
-# Function to safely update git repository
 # Determine what kind of local changes exist in the current repo (merge conflicts,
 # uncommitted changes, untracked files — ignoring expected docs_manifest.json churn),
 # so the caller knows whether to prompt before discarding them. Bash has no multi-value
@@ -321,6 +320,7 @@ confirm_discard_changes() {
     return 0
 }
 
+# Function to safely update git repository
 safe_git_update() {
     local repo_dir="$1"
     pushd "$repo_dir" >/dev/null
