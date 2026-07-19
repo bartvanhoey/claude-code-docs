@@ -43,7 +43,7 @@ While gathering Build Health data, `gh run list` showed the **"Update Claude Cod
 
 ### Priority Recommendations
 
-1. **Verify the update-docs fix (unassigned dimension, most urgent):** Check that the 21:00 UTC scheduled run of "Update Claude Code Documentation" succeeds. If it fails again, the PR-title truncation logic in `.github/workflows/update-docs.yml` needs a second look — 17 hours of consecutive failures on the project's core automated deliverable is the most operationally significant finding in this audit, even though it doesn't map cleanly onto a letter grade.
+1. **Verify the update-docs fix (unassigned dimension, most urgent):** Check that the 21:00 UTC scheduled run of "Update Claude Code Documentation" succeeds. If it fails again, the PR-title truncation logic in `.github/workflows/update-docs.yml` needs a second look — 17 hours of consecutive failures on the project's core automated deliverable is the most operationally significant finding in this audit, even though it doesn't map cleanly onto a letter grade. ❭ Won't fix — verified via `gh run list`: runs at 2026-07-18 21:43 UTC and 2026-07-19 02:06 UTC both succeeded
    Estimated effort: 5 minutes to check `gh run list --workflow=update-docs.yml --limit 1`, more only if it's still failing.
 
 2. **Code Quality (D? → B): split the 3 overlong functions:**
