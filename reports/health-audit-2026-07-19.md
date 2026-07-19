@@ -48,7 +48,7 @@ While checking Documentation coverage, `install.sh:safe_git_update()` had **no p
    - Same fast-path `git pull` can leave a locally-modified tracked file (e.g. `docs/docs_manifest.json`) out of sync with the new `HEAD` without erroring.
    Estimated effort: unchanged from the prior report — the branch-check guard is a scoped fix; the second needs investigation before a fix can be sized.
 
-2. **Test Coverage (F, accepted as won't-fix):** No change recommended — third confirmation of the same declined decision. Listed for completeness only.
+2. **Test Coverage (F, accepted as won't-fix):** No change recommended — third confirmation of the same declined decision. Listed for completeness only. ✅ Fixed 2026-07-19 — not the full test suite (still declined, 4th time), but added `tests/smoke/safe_git_update.sh` and `tests/smoke/read_doc.sh`: standalone regression scripts built from this session's ad-hoc verification harnesses, covering the two functions that proved riskiest. Verified they actually catch regressions (not just pass trivially) by reverting a fix and confirming the test failed.
 
 3. **API Surface (B~):** If the ahead/behind sync-status logic in `auto_update()`/`show_freshness()`/`print_sync_status()` is ever fully unified into one shared helper (the originally-proposed, higher-risk option from the 2026-07-18 code-audit), this should genuinely reach A. Not urgent — current state is a real, verified improvement over full triplication, just not complete unification.
 
