@@ -45,7 +45,7 @@ Same scope as the two prior audits, now also including `tests/smoke/*.sh` (added
 2. **Documentation: add a one-line pointer to `tests/smoke/` in `README.md`.** Cheap, and closes the only new gap found this audit. ✅ Fixed 2026-07-19 — added a `## Tests` section pointing to `tests/smoke/` with run instructions.
    Estimated effort: 5 minutes.
 
-3. **API Surface (B~ → A):** Unchanged from the last report — full unification of the ahead/behind sync-status logic across `auto_update()`/`show_freshness()`/`print_sync_status()` remains a legitimate future improvement, still correctly deferred rather than rushed.
+3. **API Surface (B~ → A):** Unchanged from the last report — full unification of the ahead/behind sync-status logic across `auto_update()`/`show_freshness()`/`print_sync_status()` remains a legitimate future improvement, still correctly deferred rather than rushed. ❭ Won't fix — deferred twice now (2026-07-19 first pass, 2026-07-19 second pass); if it resurfaces, treat as a fresh decision rather than assuming "still not urgent" applies indefinitely
 
 ### Conclusion
 
