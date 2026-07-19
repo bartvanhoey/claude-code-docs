@@ -52,9 +52,9 @@ While gathering Build Health data, `gh run list` showed the **"Update Claude Cod
    - `scripts/claude-docs-helper.sh.template:read_doc()` (103 lines) — extract the "fetch/compare/pull and print sync status" block into a helper (this is also the block flagged for triplication in the prior code-audit's item 4, so fixing both at once is efficient)
    Estimated effort: 2-3 hours total
 
-3. **Test Coverage (F, accepted as won't-fix):** No change recommended — this was explicitly declined by the user on 2026-06-30 and reconfirmed during the 2026-07-18 code-audit session. Listed here only for completeness, not as an action item.
+3. **Test Coverage (F, accepted as won't-fix):** No change recommended — this was explicitly declined by the user on 2026-06-30 and reconfirmed during the 2026-07-18 code-audit session. Listed here only for completeness, not as an action item. ❭ Won't fix — third confirmation of the same decision, 2026-07-19
 
-4. **API Surface (B~ → A):** Once the Code Quality refactor above extracts a shared sync-status helper, the API Surface grade should improve alongside it — no separate action needed.
+4. **API Surface (B~ → A):** Once the Code Quality refactor above extracts a shared sync-status helper, the API Surface grade should improve alongside it — no separate action needed. ❭ Won't fix — item 2 is complete; resolved as a side effect, nothing separate to implement
 
 5. **`install.sh:safe_git_update()` — fast-path `git pull` doesn't verify it's on the target branch before declaring success:** `git pull --quiet origin "$target_branch"` merges into whatever branch is currently checked out — it does not switch branches. If it succeeds while the user is on a different branch than `$target_branch`, the function returns 0 immediately and the branch-switch logic further down (intended to force the user onto `$target_branch`) never runs, silently leaving the installation on the wrong branch. Discovered 2026-07-19 while testing item 2b of a `/fix-items` session; not fixed in that session — flagged here for a dedicated fix.
    Estimated effort: add a `[[ "$current_branch" == "$target_branch" ]]` guard before attempting the fast-path pull; needs its own verification pass since it changes the function's primary control flow.
