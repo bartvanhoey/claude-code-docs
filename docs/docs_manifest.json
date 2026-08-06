@@ -105,8 +105,8 @@
     "agent-sdk__python.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/python",
       "original_md_url": "https://code.claude.com/docs/en/agent-sdk/python.md",
-      "hash": "44b2131f134c5c03887aee5712243c029b705de4b72ea9d714a8b3c79625b6de",
-      "last_updated": "2026-08-06T04:02:30.839454"
+      "hash": "ffd00c13f783aae033921c1d10162d5f4f16a8e7494467da164d4b1ae814f6b8",
+      "last_updated": "2026-08-06T06:54:25.755586"
     },
     "agent-sdk__quickstart.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/quickstart",
@@ -135,8 +135,8 @@
     "agent-sdk__skills.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/skills",
       "original_md_url": "https://code.claude.com/docs/en/agent-sdk/skills.md",
-      "hash": "6e56dc9e6d2911040cb8f01c046d884c408751d169b0aea84e3b1db819d5cd1b",
-      "last_updated": "2026-08-05T00:29:15.182115"
+      "hash": "c3d7ad8eaf830abd0b854d766450edb9920876bba84b67ce5b7be508b4fe676d",
+      "last_updated": "2026-08-06T06:54:33.015763"
     },
     "agent-sdk__slash-commands.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/slash-commands",
@@ -1059,8 +1059,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-08-06T04:04:54.676814",
-    "fetch_duration_seconds": 159.466399,
+    "last_fetch_completed": "2026-08-06T06:57:01.869620",
+    "fetch_duration_seconds": 173.189482,
     "total_pages_discovered": 176,
     "pages_fetched_successfully": 177,
     "pages_failed": 0,
@@ -1070,7 +1070,7 @@
     "total_files": 176,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-08-06T04:04:54.676835",
+  "last_updated": "2026-08-06T06:57:01.869644",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
