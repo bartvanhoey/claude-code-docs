@@ -376,8 +376,8 @@
     "code-review.md": {
       "original_url": "https://code.claude.com/docs/en/code-review",
       "original_md_url": "https://code.claude.com/docs/en/code-review.md",
-      "hash": "b03b163f11600d9122c3e94a314308b236d7f5e9a47177f53c3cee6a99abad9a",
-      "last_updated": "2026-08-05T00:29:46.087654"
+      "hash": "37080df3bb2ace86c2799d59422206faf57e7bf01cf3c4d1edfcdfab25c0df47",
+      "last_updated": "2026-08-06T00:26:20.544137"
     },
     "commands.md": {
       "original_url": "https://code.claude.com/docs/en/commands",
@@ -508,8 +508,8 @@
     "feature-availability.md": {
       "original_url": "https://code.claude.com/docs/en/feature-availability",
       "original_md_url": "https://code.claude.com/docs/en/feature-availability.md",
-      "hash": "35cefe668a31718b9bec3f3b9493e860ed098873508a8ed2bfbbca6a6d0e036a",
-      "last_updated": "2026-08-05T00:30:05.902301"
+      "hash": "24377b9392f050515fec4ff850efcbe4202691e5c29017c05b09a81483023c55",
+      "last_updated": "2026-08-06T00:26:38.352489"
     },
     "features-overview.md": {
       "original_url": "https://code.claude.com/docs/en/features-overview",
@@ -532,8 +532,14 @@
     "github-actions.md": {
       "original_url": "https://code.claude.com/docs/en/github-actions",
       "original_md_url": "https://code.claude.com/docs/en/github-actions.md",
-      "hash": "b5b839f60ff45816372ac4cc13336b97c9d7abcf18571cbea7c18a49c6f51fe4",
-      "last_updated": "2026-07-21T02:07:29.649482"
+      "hash": "efed55b8d3a8433a443363b0c745eecc276ed9745d85e0fa5d2f2311edc2919a",
+      "last_updated": "2026-08-06T00:26:41.367812"
+    },
+    "github-actions-cloud-providers.md": {
+      "original_url": "https://code.claude.com/docs/en/github-actions-cloud-providers",
+      "original_md_url": "https://code.claude.com/docs/en/github-actions-cloud-providers.md",
+      "hash": "7a7a329c318f99c2ba31868cd61df3f6430c614cf160711d6cead9d62b417c3b",
+      "last_updated": "2026-08-06T00:26:42.078939"
     },
     "github-enterprise-server.md": {
       "original_url": "https://code.claude.com/docs/en/github-enterprise-server",
@@ -1053,18 +1059,18 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-08-05T21:28:32.906142",
-    "fetch_duration_seconds": 148.593333,
-    "total_pages_discovered": 175,
-    "pages_fetched_successfully": 176,
+    "last_fetch_completed": "2026-08-06T00:27:48.351225",
+    "fetch_duration_seconds": 138.549126,
+    "total_pages_discovered": 176,
+    "pages_fetched_successfully": 177,
     "pages_failed": 0,
     "failed_pages": [],
     "sitemap_url": "https://code.claude.com/docs/sitemap.xml",
     "base_url": "https://code.claude.com",
-    "total_files": 175,
+    "total_files": 176,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-08-05T21:28:32.906168",
+  "last_updated": "2026-08-06T00:27:48.351250",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
