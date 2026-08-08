@@ -897,12 +897,18 @@ npm error errno -39
 npm error ENOTEMPTY: directory not empty, rename '...'
 ```
 
-The `npm error path` line names the directory npm couldn't move. Delete that directory and any leftover `.claude-code-*` directories next to it, which earlier interrupted runs can leave behind. The commands below find your global package directory with `npm root -g`; if that prints a different location than the `npm error path` line, for example because you switched Node versions with nvm, delete the directories the error names instead:
+The `npm error path` line names the directory npm couldn't move. Delete that directory and any leftover `.claude-code-*` directories next to it, which earlier interrupted runs can leave behind. The commands below find your global package directory with `npm root -g`; if the directory the `npm error path` line names is not under the directory `npm root -g` prints, for example because you switched Node versions with nvm, delete the directories the error names instead:
 
 <Tabs>
   <Tab title="macOS/Linux">
     ```bash theme={null}
-    rm -rf "$(npm root -g)/@anthropic-ai/claude-code" "$(npm root -g)/@anthropic-ai/.claude-code-"*
+    rm -rf "$(npm root -g)/@anthropic-ai/claude-code"
+    ```
+
+    Then remove any leftover temp directories. If zsh prints `no matches found`, there were none to remove:
+
+    ```bash theme={null}
+    rm -rf "$(npm root -g)/@anthropic-ai/.claude-code-"*
     ```
   </Tab>
 
