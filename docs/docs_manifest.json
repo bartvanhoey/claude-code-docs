@@ -424,8 +424,8 @@
     "costs.md": {
       "original_url": "https://code.claude.com/docs/en/costs",
       "original_md_url": "https://code.claude.com/docs/en/costs.md",
-      "hash": "37beb85c4a849f71a387b5c837fd8c18846e3ff2ae0c0ac5548ddb38e046579d",
-      "last_updated": "2026-08-08T00:15:20.939801"
+      "hash": "6c4ff6151585ac06c51ce7d95fc48f8ec7e18ca45b5725fadb804f55512a49f5",
+      "last_updated": "2026-08-11T06:19:42.468775"
     },
     "cross-session-messaging.md": {
       "original_url": "https://code.claude.com/docs/en/cross-session-messaging",
@@ -514,8 +514,8 @@
     "fast-mode.md": {
       "original_url": "https://code.claude.com/docs/en/fast-mode",
       "original_md_url": "https://code.claude.com/docs/en/fast-mode.md",
-      "hash": "8b834eab43477b848aa87e43f0b4493a46a191dc9f149b0cf410182215c9de32",
-      "last_updated": "2026-08-04T22:07:57.041557"
+      "hash": "b035f1e546e7c03e5a9d2d8bc17b15bdaf584eb6cd7354bcca0d0c5c6267b131",
+      "last_updated": "2026-08-11T06:19:56.973244"
     },
     "feature-availability.md": {
       "original_url": "https://code.claude.com/docs/en/feature-availability",
@@ -1125,8 +1125,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-08-11T03:34:45.791342",
-    "fetch_duration_seconds": 151.219463,
+    "last_fetch_completed": "2026-08-11T06:21:28.758899",
+    "fetch_duration_seconds": 173.014663,
     "total_pages_discovered": 187,
     "pages_fetched_successfully": 188,
     "pages_failed": 0,
@@ -1136,7 +1136,7 @@
     "total_files": 187,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-08-11T03:34:45.791400",
+  "last_updated": "2026-08-11T06:21:28.758922",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
