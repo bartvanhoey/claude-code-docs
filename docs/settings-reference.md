@@ -5050,11 +5050,11 @@ Keys an organization uses to compute, refresh, and combine managed settings. See
 
 ### `disableSideloadFlags`
 
-Reject the `--plugin-dir`, `--plugin-url`, `--agents`, and `--mcp-config` CLI flags at startup, which users could otherwise pass to bypass [`strictKnownMarketplaces`](#strictknownmarketplaces) for a single run. Claude Code exits with an error naming the rejected flags, and applies the same check to surfaces that start the CLI with these flags internally, currently [Cowork](/docs/en/desktop) local sessions in the desktop app. Requires Claude Code v2.1.193 or later.
+Reject the `--plugin-dir`, `--plugin-url`, `--agents`, and `--mcp-config` CLI flags at startup, which users could otherwise pass to bypass [`strictKnownMarketplaces`](#strictknownmarketplaces) for a single run. Claude Code exits with an error naming the rejected flags, and applies the same check to surfaces that start the CLI with these flags internally, currently [Cowork](/docs/en/desktop) local sessions in the desktop app. In [cloud sessions](/docs/en/claude-code-on-the-web), Claude Code drops the MCP servers the server delivered through `--mcp-config`, other than in-process `type: "sdk"` entries, and starts the session. Requires Claude Code v2.1.193 or later.
 
 * **Scope**: [`Managed`](#scopes)
 * **Type**: Boolean
-  * `true`: Claude Code rejects `--plugin-dir`, `--plugin-url`, `--agents`, and `--mcp-config` at startup and exits with an error naming them
+  * `true`: Claude Code rejects `--plugin-dir`, `--plugin-url`, `--agents`, and `--mcp-config` at startup and exits with an error naming them, except that in cloud sessions it drops the MCP servers the server delivered through `--mcp-config`, other than in-process `type: "sdk"` entries, and starts the session
   * `false`: Claude Code accepts those flags
 * **Default**: `false`
 
@@ -5064,7 +5064,9 @@ Reject the `--plugin-dir`, `--plugin-url`, `--agents`, and `--mcp-config` CLI fl
 }
 ```
 
-A `--mcp-config` whose servers are all in-process `type: "sdk"` entries is still accepted, so the Agent SDK and VS Code extension keep working. This key doesn't block `claude mcp add`, `.mcp.json`, or SDK `setMcpServers()`; pair it with [`allowedMcpServers`](/docs/en/managed-mcp) for per-server MCP control. Requires Claude Code v2.1.193 or later.
+Claude Code still accepts a `--mcp-config` whose servers are all in-process `type: "sdk"` entries, so the Agent SDK and VS Code extension keep working. Users can still add servers with `claude mcp add` or a `.mcp.json` file; for per-server control, set [`allowedMcpServers`](/docs/en/managed-mcp) as well. Requires Claude Code v2.1.193 or later.
+
+In cloud sessions, Claude Code also ignores server-delivered mid-session MCP updates, the path behind cloud session configuration and SDK `setMcpServers()` on remote workers. In-process `type: "sdk"` entries stay exempt there too. Before v2.1.239, a server-delivered `--mcp-config` blocked a cloud session from starting.
 
 ### `forceRemoteSettingsRefresh`
 
