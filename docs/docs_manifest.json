@@ -736,8 +736,8 @@
     "permissions.md": {
       "original_url": "https://code.claude.com/docs/en/permissions",
       "original_md_url": "https://code.claude.com/docs/en/permissions.md",
-      "hash": "6a1d2d107dc217f2d2f699d6d6a602fa6f6f806ac81a28a5d9664d77a2b6a791",
-      "last_updated": "2026-08-25T00:11:11.861852"
+      "hash": "4e38845956e078405ee411b496021df73e3a23c86f87f47ecd726549e2d50ed1",
+      "last_updated": "2026-08-25T18:12:49.531639"
     },
     "platforms.md": {
       "original_url": "https://code.claude.com/docs/en/platforms",
@@ -1149,8 +1149,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-08-25T15:19:47.788589",
-    "fetch_duration_seconds": 181.629412,
+    "last_fetch_completed": "2026-08-25T18:16:27.330541",
+    "fetch_duration_seconds": 495.612789,
     "total_pages_discovered": 191,
     "pages_fetched_successfully": 192,
     "pages_failed": 0,
@@ -1160,7 +1160,7 @@
     "total_files": 191,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-08-25T15:19:47.788622",
+  "last_updated": "2026-08-25T18:16:27.330566",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
