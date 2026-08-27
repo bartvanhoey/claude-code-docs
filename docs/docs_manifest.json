@@ -670,8 +670,8 @@
     "mcp.md": {
       "original_url": "https://code.claude.com/docs/en/mcp",
       "original_md_url": "https://code.claude.com/docs/en/mcp.md",
-      "hash": "81eb377a5fa1990e23398ae100425f130f08869e87754f20938bb5f04b627fb9",
-      "last_updated": "2026-08-27T01:25:35.508697"
+      "hash": "19a036f16bd0fc454dbc1505ef23ca747f8c1dd33d20b8c36290c7aaa282ce84",
+      "last_updated": "2026-08-27T04:48:20.918604"
     },
     "mcp-quickstart.md": {
       "original_url": "https://code.claude.com/docs/en/mcp-quickstart",
@@ -1149,8 +1149,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-08-27T01:26:56.349075",
-    "fetch_duration_seconds": 200.572078,
+    "last_fetch_completed": "2026-08-27T04:49:30.605783",
+    "fetch_duration_seconds": 172.791473,
     "total_pages_discovered": 191,
     "pages_fetched_successfully": 192,
     "pages_failed": 0,
@@ -1160,7 +1160,7 @@
     "total_files": 191,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-08-27T01:26:56.349091",
+  "last_updated": "2026-08-27T04:49:30.605807",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
