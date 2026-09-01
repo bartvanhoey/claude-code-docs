@@ -496,8 +496,8 @@
     "env-vars.md": {
       "original_url": "https://code.claude.com/docs/en/env-vars",
       "original_md_url": "https://code.claude.com/docs/en/env-vars.md",
-      "hash": "46cbaf3c5602902a24b32d90b29374a10278effeb00f6e3c97061c768fba7400",
-      "last_updated": "2026-09-01T03:10:41.041418"
+      "hash": "b6e9d7473ca908dc5a0391c13724e3291cf3e83b2ecf9645d96dead99a000303",
+      "last_updated": "2026-09-01T15:08:15.946564"
     },
     "errors.md": {
       "original_url": "https://code.claude.com/docs/en/errors",
@@ -670,8 +670,8 @@
     "mcp.md": {
       "original_url": "https://code.claude.com/docs/en/mcp",
       "original_md_url": "https://code.claude.com/docs/en/mcp.md",
-      "hash": "c4d6746c8ae51e0fdaf10443ae115d692833ede95db6047dbc2dd67eb6f1244d",
-      "last_updated": "2026-08-31T06:17:14.042640"
+      "hash": "6fcd70146a05d0ca779e2b48accf9ba38f6c8db6ea32f4b7b2ab3b3f4a2b3e3b",
+      "last_updated": "2026-09-01T15:08:44.324984"
     },
     "mcp-quickstart.md": {
       "original_url": "https://code.claude.com/docs/en/mcp-quickstart",
@@ -820,8 +820,8 @@
     "sandboxing.md": {
       "original_url": "https://code.claude.com/docs/en/sandboxing",
       "original_md_url": "https://code.claude.com/docs/en/sandboxing.md",
-      "hash": "a9bb148592b3aec5101b205d0c452b6b21bafce5cfa47473dff97e98408ef35c",
-      "last_updated": "2026-09-01T03:11:28.265043"
+      "hash": "1454b065eccbe31927e1cbfe2ab6f399a6c02cbc994ee44adad6f9d9e018c37d",
+      "last_updated": "2026-09-01T15:09:06.825430"
     },
     "scheduled-tasks.md": {
       "original_url": "https://code.claude.com/docs/en/scheduled-tasks",
@@ -1149,8 +1149,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-09-01T12:13:58.191925",
-    "fetch_duration_seconds": 169.025855,
+    "last_fetch_completed": "2026-09-01T15:09:49.653267",
+    "fetch_duration_seconds": 180.633388,
     "total_pages_discovered": 191,
     "pages_fetched_successfully": 192,
     "pages_failed": 0,
@@ -1160,7 +1160,7 @@
     "total_files": 191,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-09-01T12:13:58.191954",
+  "last_updated": "2026-09-01T15:09:49.653308",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
