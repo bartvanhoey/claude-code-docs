@@ -75,8 +75,8 @@
     "agent-sdk__migration-guide.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/migration-guide",
       "original_md_url": "https://code.claude.com/docs/en/agent-sdk/migration-guide.md",
-      "hash": "5c55aecef4913f5a9bed665f7f5907cb933b579e7f4c584086b1b3fa721ebdd4",
-      "last_updated": "2026-08-28T21:23:36.187306"
+      "hash": "1c9fd0cee873c913d41cf515cd3c70464d2dbe9208691e70b09e43cc2dbd2a8c",
+      "last_updated": "2026-09-04T18:09:39.066755"
     },
     "agent-sdk__modifying-system-prompts.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/modifying-system-prompts",
@@ -93,8 +93,8 @@
     "agent-sdk__overview.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/overview",
       "original_md_url": "https://code.claude.com/docs/en/agent-sdk/overview.md",
-      "hash": "cb761e1199180106ce3dfc97ff1bb937bce28fa4194c721839983ba7a8ef79ed",
-      "last_updated": "2026-08-29T06:11:00.207362"
+      "hash": "97ffb20562a473292629fbfb8b8e8611dc72f8afae55a3364baf95a30340d356",
+      "last_updated": "2026-09-04T18:09:41.802736"
     },
     "agent-sdk__permissions.md": {
       "original_url": "https://code.claude.com/docs/en/agent-sdk/permissions",
@@ -382,8 +382,8 @@
     "commands.md": {
       "original_url": "https://code.claude.com/docs/en/commands",
       "original_md_url": "https://code.claude.com/docs/en/commands.md",
-      "hash": "a40b7f4ece9accde15144d8585bcba3638726de0ebffa18b13568a2037ffcf7d",
-      "last_updated": "2026-09-01T18:10:59.670657"
+      "hash": "76db0c765dfb242aa55259f6d8c149e9f9e4fdc3ca277126f503745c3167fd48",
+      "last_updated": "2026-09-04T18:10:44.548640"
     },
     "common-workflows.md": {
       "original_url": "https://code.claude.com/docs/en/common-workflows",
@@ -526,8 +526,8 @@
     "fullscreen.md": {
       "original_url": "https://code.claude.com/docs/en/fullscreen",
       "original_md_url": "https://code.claude.com/docs/en/fullscreen.md",
-      "hash": "fcb65452faae56b8566a53841bb7811fe7ae6c1c8f7fbbd8bb25cc279190af18",
-      "last_updated": "2026-09-04T15:08:16.287814"
+      "hash": "a161da5bda598c7cffc5656eaf9bb543ee74c2162f9f4e38e842a3838a8ccbcc",
+      "last_updated": "2026-09-04T18:11:21.826439"
     },
     "gateways.md": {
       "original_url": "https://code.claude.com/docs/en/gateways",
@@ -604,8 +604,8 @@
     "interactive-mode.md": {
       "original_url": "https://code.claude.com/docs/en/interactive-mode",
       "original_md_url": "https://code.claude.com/docs/en/interactive-mode.md",
-      "hash": "81265075e6133acb8b7599c818ca73c133adcce16663da6ca5b5b7fe95a9fb8d",
-      "last_updated": "2026-09-04T15:08:27.521621"
+      "hash": "00468b887bd49dc5553750ef3a927cdbd785d65420711b9c170ff0aca0983fd2",
+      "last_updated": "2026-09-04T18:11:37.825937"
     },
     "jetbrains.md": {
       "original_url": "https://code.claude.com/docs/en/jetbrains",
@@ -616,8 +616,8 @@
     "keybindings.md": {
       "original_url": "https://code.claude.com/docs/en/keybindings",
       "original_md_url": "https://code.claude.com/docs/en/keybindings.md",
-      "hash": "5ba5284571fa8641403e9de0bf3f9215b316b9b06f393e695e888ea2025335f1",
-      "last_updated": "2026-09-04T15:08:29.015614"
+      "hash": "e3089106d21ce207ec2a57a3e6639d6fece54ed6fbfe9b988593d40509636b5c",
+      "last_updated": "2026-09-04T18:11:41.095654"
     },
     "large-codebases.md": {
       "original_url": "https://code.claude.com/docs/en/large-codebases",
@@ -1149,8 +1149,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-09-04T15:09:52.085781",
-    "fetch_duration_seconds": 179.202152,
+    "last_fetch_completed": "2026-09-04T18:13:46.686562",
+    "fetch_duration_seconds": 322.851717,
     "total_pages_discovered": 191,
     "pages_fetched_successfully": 192,
     "pages_failed": 0,
@@ -1160,7 +1160,7 @@
     "total_files": 191,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-09-04T15:09:52.085804",
+  "last_updated": "2026-09-04T18:13:46.686585",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
