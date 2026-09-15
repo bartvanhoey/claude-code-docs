@@ -267,8 +267,8 @@
     "changelog.md": {
       "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
       "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-      "hash": "e863323a559fa9befe1ca49ce1cb82e0ba961630f7498becc3273e8e0f67da55",
-      "last_updated": "2026-09-12T21:08:26.899175",
+      "hash": "a4540b283ca457d3d66a5aa07af2ca66b097d5d89ee02041f9d59c37a7822253",
+      "last_updated": "2026-09-15T00:22:05.671283",
       "source": "claude-code-repository"
     },
     "channels.md": {
@@ -706,8 +706,8 @@
     "monitoring-usage.md": {
       "original_url": "https://code.claude.com/docs/en/monitoring-usage",
       "original_md_url": "https://code.claude.com/docs/en/monitoring-usage.md",
-      "hash": "5395c41a9653c1dc1cde4bf7f42f7ba7694bb43368f468592f173037d5c7234a",
-      "last_updated": "2026-09-12T03:09:02.693434"
+      "hash": "5d8983535f1d6d7dc4c4cc25f3d9c10cccd93efb677b5039860d404c94242bd6",
+      "last_updated": "2026-09-15T00:21:18.905902"
     },
     "network-config.md": {
       "original_url": "https://code.claude.com/docs/en/network-config",
@@ -808,8 +808,8 @@
     "remote-control.md": {
       "original_url": "https://code.claude.com/docs/en/remote-control",
       "original_md_url": "https://code.claude.com/docs/en/remote-control.md",
-      "hash": "79a183d3f1375f3fc1d14c9c629a8bdce367d15e1917c35e0b648c0814220cc3",
-      "last_updated": "2026-09-14T21:07:30.704382"
+      "hash": "790c053a6ed47f4048471afa963ff1e581a37a1c32afd62955f48a3deebf17cf",
+      "last_updated": "2026-09-15T00:21:29.753166"
     },
     "routines.md": {
       "original_url": "https://code.claude.com/docs/en/routines",
@@ -1155,8 +1155,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-09-14T21:08:08.481967",
-    "fetch_duration_seconds": 129.818268,
+    "last_fetch_completed": "2026-09-15T00:22:05.673151",
+    "fetch_duration_seconds": 121.004105,
     "total_pages_discovered": 192,
     "pages_fetched_successfully": 193,
     "pages_failed": 0,
@@ -1166,7 +1166,7 @@
     "total_files": 192,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-09-14T21:08:08.481993",
+  "last_updated": "2026-09-15T00:22:05.673173",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
