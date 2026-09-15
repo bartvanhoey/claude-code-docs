@@ -2432,11 +2432,15 @@ Use '--' to separate paths from revisions, like this:
 'git <command> [<revision>...] -- [<file>...]'
 ```
 
-The quoted command varies between runs: the review starts several `git` commands against `origin/HEAD` at once and reports whichever fails first, so you may see `git log` or a different `git diff` in its place. Git creates the ref only when the remote's default branch is both advertised by the remote and covered by your fetch refspec. A full `git clone` of a remote with commits meets both conditions. Single-branch and CI checkouts fetch too narrow a refspec, a server-side HEAD left pointing at a branch nobody pushed advertises no default, and a repository with no `origin` remote, or one you never fetched, provides neither.
+The message may quote `git log` or a different `git diff` instead. Git creates `origin/HEAD` only when the remote advertises a default branch and your fetch refspec covers it, which a full `git clone` of a remote with commits does. The ref is missing in these setups:
 
-Claude Code shows the same error for any skill that [injects dynamic context](/docs/en/skills#when-an-injected-command-fails). A failed injected command aborts that skill's invocation. Two sibling strings fire before the command runs at all:
+* A single-branch or CI checkout, which fetches too narrow a refspec
+* A remote whose server-side HEAD points at a branch nobody pushed
+* A repository with no `origin` remote, or one you never fetched
 
-* `Shell command permission check failed for pattern "..."`: the command's permission check returned something other than allow. Injected commands never prompt, so the invocation aborts without asking you. Pre-approve commands that no rule matches with [`allowed-tools`](/docs/en/skills#pre-approve-tools-for-a-skill). A matching ask or deny rule still aborts the invocation regardless of `allowed-tools`
+Claude Code shows the same error for any skill that [injects dynamic context](/docs/en/skills#when-an-injected-command-fails), and a failed injected command aborts that skill's invocation. Two sibling strings fire before the command runs at all:
+
+* `Shell command permission check failed for pattern "..."`: the command's permission check didn't allow it. [Permission checks on injected commands](/docs/en/skills#permission-checks-on-injected-commands) covers which results abort in each permission mode and how to pre-approve a command with `allowed-tools`
 * ``Skill <name> requires bash (`shell: bash` in frontmatter) but Git Bash was not found``: the skill's frontmatter demands bash on a machine without it. Install Git for Windows or change the frontmatter to `shell: powershell`. See [How injected commands run](/docs/en/skills#how-injected-commands-run)
 
 **What to do:**
