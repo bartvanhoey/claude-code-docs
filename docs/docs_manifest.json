@@ -273,8 +273,8 @@
     "changelog.md": {
       "original_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
       "original_raw_url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
-      "hash": "cd03bdad514e0d4c78c0f874d6085cd545c65d56e9915f512c7e00edddfd8951",
-      "last_updated": "2026-09-18T00:21:05.128445",
+      "hash": "d87eeda90146e148605b1d5ea9b749ab6810c44578a3d33592ba7a6d4ae166c2",
+      "last_updated": "2026-09-18T03:10:22.533321",
       "source": "claude-code-repository"
     },
     "channels.md": {
@@ -502,8 +502,8 @@
     "discover-plugins.md": {
       "original_url": "https://code.claude.com/docs/en/discover-plugins",
       "original_md_url": "https://code.claude.com/docs/en/discover-plugins.md",
-      "hash": "b5235a7b83b95192aeadfc078fcbd424ecdeb949fa88bc5bfd82513d6e633b11",
-      "last_updated": "2026-09-16T21:07:34.717819"
+      "hash": "2600fca633e0c31edd0ac5a0f8816e1fedee1f554c4c3ed6acc393966b2a1784",
+      "last_updated": "2026-09-18T03:09:06.268143"
     },
     "env-vars.md": {
       "original_url": "https://code.claude.com/docs/en/env-vars",
@@ -760,8 +760,8 @@
     "plugin-dependencies.md": {
       "original_url": "https://code.claude.com/docs/en/plugin-dependencies",
       "original_md_url": "https://code.claude.com/docs/en/plugin-dependencies.md",
-      "hash": "00a0c4ecf579422dcf1e8cced5d41ef0cbc0f9f49875495f08db3bee04237cfd",
-      "last_updated": "2026-09-16T00:19:31.070416"
+      "hash": "51a35b04e9dca54f568fcd70351f8db009aa75a40cdb87a34e5a4b309c93d434",
+      "last_updated": "2026-09-18T03:09:35.237593"
     },
     "plugin-evals.md": {
       "original_url": "https://code.claude.com/docs/en/plugin-evals",
@@ -778,8 +778,8 @@
     "plugin-marketplaces.md": {
       "original_url": "https://code.claude.com/docs/en/plugin-marketplaces",
       "original_md_url": "https://code.claude.com/docs/en/plugin-marketplaces.md",
-      "hash": "31e8773f0cff90d72c6ef8530ba3a6c52438c47c95cb419be4fff315d7ec47f5",
-      "last_updated": "2026-09-17T06:14:05.372616"
+      "hash": "6564466c4d9d9e93a67ddbcd1781fe4cf73ec1aa06a41383eeb47f6637b0a689",
+      "last_updated": "2026-09-18T03:09:37.245633"
     },
     "plugin-relevance.md": {
       "original_url": "https://code.claude.com/docs/en/plugin-relevance",
@@ -796,8 +796,8 @@
     "plugins-reference.md": {
       "original_url": "https://code.claude.com/docs/en/plugins-reference",
       "original_md_url": "https://code.claude.com/docs/en/plugins-reference.md",
-      "hash": "d5de53e3435750235e0cd4549b51f1bf19ad8b622a5ff945901d8484f0cedba2",
-      "last_updated": "2026-09-16T21:08:04.395405"
+      "hash": "5c1824cd1851c35e079c72db49e383bac26cd376fddb6b96ca6df2ecf980e544",
+      "last_updated": "2026-09-18T03:09:39.235289"
     },
     "prompt-caching.md": {
       "original_url": "https://code.claude.com/docs/en/prompt-caching",
@@ -838,8 +838,8 @@
     "sandboxing.md": {
       "original_url": "https://code.claude.com/docs/en/sandboxing",
       "original_md_url": "https://code.claude.com/docs/en/sandboxing.md",
-      "hash": "f4aea577087c100af55310a11beb32fc079684124c00d34d487bd7c9be9419b6",
-      "last_updated": "2026-09-16T00:19:38.669862"
+      "hash": "c1b48d15ec7181a1839b6c519757fd51d499ec72c6718a6296d7a8629baa18d0",
+      "last_updated": "2026-09-18T03:09:43.902260"
     },
     "scheduled-tasks.md": {
       "original_url": "https://code.claude.com/docs/en/scheduled-tasks",
@@ -1185,8 +1185,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-09-18T00:21:05.130020",
-    "fetch_duration_seconds": 134.53436,
+    "last_fetch_completed": "2026-09-18T03:10:22.535022",
+    "fetch_duration_seconds": 133.641274,
     "total_pages_discovered": 197,
     "pages_fetched_successfully": 198,
     "pages_failed": 0,
@@ -1196,7 +1196,7 @@
     "total_files": 197,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-09-18T00:21:05.130038",
+  "last_updated": "2026-09-18T03:10:22.535039",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
