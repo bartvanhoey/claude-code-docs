@@ -1257,8 +1257,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-09-25T12:13:13.382386",
-    "fetch_duration_seconds": 120.351441,
+    "last_fetch_completed": "2026-09-25T15:09:48.066746",
+    "fetch_duration_seconds": 131.06647,
     "total_pages_discovered": 209,
     "pages_fetched_successfully": 210,
     "pages_failed": 0,
@@ -1268,7 +1268,7 @@
     "total_files": 209,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-09-25T12:13:13.382417",
+  "last_updated": "2026-09-25T15:09:48.066786",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
