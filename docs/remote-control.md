@@ -303,7 +303,7 @@ For a lost or stolen device, the member removes it from this page. If the member
 
 Remote Control and [cloud sessions](/docs/en/claude-code-on-the-web) both use the claude.ai/code interface. The key difference is where the session runs: Remote Control executes on your machine, so your local MCP servers, tools, and project configuration stay available. A cloud session executes on cloud infrastructure, Anthropic-managed by default.
 
-Use Remote Control when you're in the middle of local work and want to keep going from another device. Use a cloud session when you want to start a task without any local setup, work on a repo you don't have cloned, or run multiple tasks in parallel.
+Use Remote Control when you're in the middle of local work and want to keep going from another device. Use a cloud session when you want to start a task without any local setup, work on a repo you don't have cloned, or run multiple tasks in parallel. A [project](/docs/en/claude-projects) combines the two: its threads run in the cloud, and it uses Remote Control to [run a thread on your computer](/docs/en/claude-projects#run-a-thread-on-your-own-computer) when you ask for one there.
 
 ## Mobile push notifications
 
