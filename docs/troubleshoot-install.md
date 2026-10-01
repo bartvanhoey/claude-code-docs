@@ -20,6 +20,7 @@ Match the error message or symptom you're seeing to a fix:
 | `curl: (23)` or `curl: (56) Failure writing output to destination` | [Check connectivity or use an alternative installer](#curl-56-failure-writing-output-to-destination) |
 | `Killed` during install on Linux, or `Installation was killed before it could finish (exit code 137)` | [Free memory or add swap space](#install-killed-on-low-memory-linux-servers) |
 | `Raw mode is not supported` during install | [Rerun the installer](#raw-mode-is-not-supported-during-install) |
+| `EACCES: permission denied` during install | [Fix the install directory's permissions](#permission-errors-during-installation) |
 | `TLS connect error` or `SSL/TLS secure channel` | [Update CA certificates](#tls-or-ssl-connection-errors) |
 | `Failed to fetch version` or can't reach download server | [Check network and proxy settings](#check-network-connectivity) |
 | `irm is not recognized` or `The token '&&' is not a valid statement separator` | [Use the right command for your shell](#wrong-install-command-on-windows) |
@@ -283,7 +284,18 @@ winget uninstall Anthropic.ClaudeCode
 
 ### Check directory permissions
 
-The installer needs write access to `~/.local/bin/` and `~/.claude/` on macOS and Linux. On Windows the install location is under `%USERPROFILE%`, which is writable by your user by default, so this section rarely applies there.
+An install that fails on permissions names the path it couldn't create or write. On Windows the install writes under `%USERPROFILE%`, which is writable by your user by default, so this section rarely applies there.
+
+On macOS and Linux the install writes to these locations:
+
+* `~/.claude/downloads/`: where the install command puts the downloaded binary
+* `~/.local/bin/`: the `claude` launcher
+* `~/.local/share/claude/`: each version it downloads
+* `~/.local/state/claude/`: its lock files
+* `~/.cache/claude/`: staged downloads
+* [`~/.claude.json`](/docs/en/claude-directory): your global config file, where the installer records the install method
+
+If you set `XDG_DATA_HOME`, `XDG_STATE_HOME`, or `XDG_CACHE_HOME`, the install uses those in place of `~/.local/share`, `~/.local/state`, and `~/.cache`. If you set [`CLAUDE_CONFIG_DIR`](/docs/en/env-vars), the global config file lives under that directory instead of your home directory.
 
 Check whether the directories are writable:
 
