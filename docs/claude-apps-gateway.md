@@ -466,7 +466,7 @@ Once connected, Claude Desktop sends model requests from every enabled tab throu
 
 ### CI pipelines and remote machines
 
-There is no service-token flow for unattended pipelines. Gateway sign-in always runs the browser device flow, so a CI job with no developer to approve the sign-in can't authenticate; configure those against your provider directly.
+There is no service-token flow for unattended pipelines. Gateway sign-in always runs the browser device flow, so a CI job with no developer to approve the sign-in can't authenticate; configure those against your provider directly. Deploy `forceLoginMethod` and `forceLoginGatewayUrl` to developer machines and leave them off CI runners. On a machine whose managed settings set them, a session that authenticates with `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `apiKeyHelper` [exits at startup](/docs/en/errors#administrator-policy-requires-a-cloud-gateway-sign-in).
 
 Once a developer has signed in, each Claude Code session on that machine uses the gateway session, including non-interactive `claude -p` runs and sessions started by the Agent SDK. Claude Code applies the [gateway policy](/docs/en/claude-apps-gateway-config#managed) to each of them.
 
