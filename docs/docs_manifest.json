@@ -310,8 +310,8 @@
     "claude-apps-gateway.md": {
       "original_url": "https://code.claude.com/docs/en/claude-apps-gateway",
       "original_md_url": "https://code.claude.com/docs/en/claude-apps-gateway.md",
-      "hash": "967484dcd3aadb42dc2b638d08507ce73fe527e158f9ab313b273f96a17ec409",
-      "last_updated": "2026-10-28T22:09:11.785883"
+      "hash": "716f50f7cb60241386315a79278eefcdb9f610eee3d217d0c2d056cb23b96f0a",
+      "last_updated": "2026-10-30T00:32:49.182399"
     },
     "claude-apps-gateway-config.md": {
       "original_url": "https://code.claude.com/docs/en/claude-apps-gateway-config",
@@ -394,8 +394,8 @@
     "code-review-costs.md": {
       "original_url": "https://code.claude.com/docs/en/code-review-costs",
       "original_md_url": "https://code.claude.com/docs/en/code-review-costs.md",
-      "hash": "3ed70e71b5e0ff6d6f4586502723420be7ce4496c9d1becace1b789f9029e6e1",
-      "last_updated": "2026-10-23T18:50:20.178777"
+      "hash": "55cc84e7bf4337f5a8392b976f0ff32393585a982416df47f3612062d017f464",
+      "last_updated": "2026-10-30T00:32:57.001009"
     },
     "code-review-customize.md": {
       "original_url": "https://code.claude.com/docs/en/code-review-customize",
@@ -496,8 +496,8 @@
     "desktop.md": {
       "original_url": "https://code.claude.com/docs/en/desktop",
       "original_md_url": "https://code.claude.com/docs/en/desktop.md",
-      "hash": "0b310de6ce2c508bf6df4aa01e088129f4594ba448329d0018524194a90bf5f3",
-      "last_updated": "2026-10-28T22:09:42.422848"
+      "hash": "81c0f7405f9e932aab0d406729b8167b156062d73be6b787a00058faac6d8db0",
+      "last_updated": "2026-10-30T00:33:06.501473"
     },
     "desktop-ios-simulator.md": {
       "original_url": "https://code.claude.com/docs/en/desktop-ios-simulator",
@@ -628,8 +628,8 @@
     "hipaa-setup.md": {
       "original_url": "https://code.claude.com/docs/en/hipaa-setup",
       "original_md_url": "https://code.claude.com/docs/en/hipaa-setup.md",
-      "hash": "168e965bcca4d986fce6eb6aba66f27d6e329872c6d9a665988d6e7ef7086145",
-      "last_updated": "2026-10-23T18:50:47.145579"
+      "hash": "60c4ce4cc2f5a0d20df411d0e99c67109bb78915047a251f217f7914a1de5f9b",
+      "last_updated": "2026-10-30T00:33:18.822569"
     },
     "hooks.md": {
       "original_url": "https://code.claude.com/docs/en/hooks",
@@ -1114,8 +1114,8 @@
     "setup.md": {
       "original_url": "https://code.claude.com/docs/en/setup",
       "original_md_url": "https://code.claude.com/docs/en/setup.md",
-      "hash": "df57c9a56399c1be2a6d6732fe9ddcdb189cab7f78d203d68e83f495036e123f",
-      "last_updated": "2026-10-23T18:51:43.348305"
+      "hash": "b5caffe667a021b59163d6db8f7bc9b26d903c011e3fb35822f3d0b2f9afc09d",
+      "last_updated": "2026-10-30T00:34:04.306731"
     },
     "skills.md": {
       "original_url": "https://code.claude.com/docs/en/skills",
@@ -1162,8 +1162,8 @@
     "troubleshoot-install.md": {
       "original_url": "https://code.claude.com/docs/en/troubleshoot-install",
       "original_md_url": "https://code.claude.com/docs/en/troubleshoot-install.md",
-      "hash": "4178497a5234fd06411624face6bad334991373314e71012e8fa89c7d7a1f8b4",
-      "last_updated": "2026-10-28T22:11:28.416558"
+      "hash": "bc71e850b2604f7c86b2c2f82bbd9e2651d0d92100e74263368f5f96881ddf63",
+      "last_updated": "2026-10-30T00:34:08.814327"
     },
     "troubleshooting.md": {
       "original_url": "https://code.claude.com/docs/en/troubleshooting",
@@ -1365,8 +1365,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-10-29T20:03:13.608558",
-    "fetch_duration_seconds": 131.830285,
+    "last_fetch_completed": "2026-10-30T00:34:27.188267",
+    "fetch_duration_seconds": 127.475866,
     "total_pages_discovered": 227,
     "pages_fetched_successfully": 228,
     "pages_failed": 0,
@@ -1376,7 +1376,7 @@
     "total_files": 227,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-10-29T20:03:13.608584",
+  "last_updated": "2026-10-30T00:34:27.188293",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
