@@ -496,8 +496,8 @@
     "desktop.md": {
       "original_url": "https://code.claude.com/docs/en/desktop",
       "original_md_url": "https://code.claude.com/docs/en/desktop.md",
-      "hash": "0b9c66683c20346bccce5edf45162f1945d19b7db29ee115626819e17dfdfe67",
-      "last_updated": "2026-10-31T03:42:04.498280"
+      "hash": "cac6a537e446076c84954dd7264ca62a5ffff40928db1cfa608adaf8c6e564d4",
+      "last_updated": "2026-11-02T00:09:08.699015"
     },
     "desktop-ios-simulator.md": {
       "original_url": "https://code.claude.com/docs/en/desktop-ios-simulator",
@@ -1365,8 +1365,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-11-01T19:20:56.478996",
-    "fetch_duration_seconds": 125.487783,
+    "last_fetch_completed": "2026-11-02T00:10:30.031882",
+    "fetch_duration_seconds": 128.083298,
     "total_pages_discovered": 227,
     "pages_fetched_successfully": 228,
     "pages_failed": 0,
@@ -1376,7 +1376,7 @@
     "total_files": 227,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-11-01T19:20:56.479033",
+  "last_updated": "2026-11-02T00:10:30.031912",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
