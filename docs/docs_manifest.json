@@ -658,8 +658,8 @@
     "jetbrains.md": {
       "original_url": "https://code.claude.com/docs/en/jetbrains",
       "original_md_url": "https://code.claude.com/docs/en/jetbrains.md",
-      "hash": "1af2bb66618140841118e0cff7149bcf6223d1c003a6fbc1f934ff1377f9a1da",
-      "last_updated": "2026-10-30T21:53:09.376406"
+      "hash": "488a0cba98c2e6dfcd168cbe39bff43c5e374e02b1889ec708a712ec38992a01",
+      "last_updated": "2026-11-03T13:28:15.863715"
     },
     "keybindings.md": {
       "original_url": "https://code.claude.com/docs/en/keybindings",
@@ -1365,8 +1365,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-11-03T04:58:14.243265",
-    "fetch_duration_seconds": 126.61378,
+    "last_fetch_completed": "2026-11-03T13:29:20.538680",
+    "fetch_duration_seconds": 125.471134,
     "total_pages_discovered": 227,
     "pages_fetched_successfully": 228,
     "pages_failed": 0,
@@ -1376,7 +1376,7 @@
     "total_files": 227,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-11-03T04:58:14.243279",
+  "last_updated": "2026-11-03T13:29:20.538704",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
