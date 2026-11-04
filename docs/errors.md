@@ -425,6 +425,9 @@ Match the message you see to a section below.
 | `Your organization requires remote managed settings to load, but they could not be loaded` | [Enforce fail-closed startup](https://code.claude.com/docs/en/server-managed-settings.md#enforce-fail-closed-startup) |
 | `Remote managed settings are still loading` | [Configuration warnings](#remote-managed-settings-failed-to-load) |
 | `Remote managed settings did not load` | [Configuration warnings](#remote-managed-settings-failed-to-load) |
+| `Claude Code couldn't load your organization's settings` / `Claude Code couldn't reach Anthropic to load your organization's settings` / `requires them before a session can start` | [Configuration warnings](#couldnt-load-your-organizations-settings) |
+| `Claude Code can't start this session yet` | [Configuration warnings](#couldnt-load-your-organizations-settings) |
+| `Your Claude session has expired. Sign in again to continue (claude auth login).` | [Configuration warnings](#couldnt-load-your-organizations-settings) |
 | `Managed settings were not approved; exiting without applying them.` | [Configuration warnings](#managed-settings-were-not-approved) |
 | `Your organization's managed settings need your approval, which couldn't be asked for here.` | [Configuration warnings](#managed-settings-need-your-approval) |
 | `Claude Code can't start: your organization's managed settings block the default model` / `Claude Code can't start: your organization allows only the models listed in "availableModels"` | [Configuration warnings](#managed-settings-block-the-default-model) |
@@ -5845,6 +5848,26 @@ In the Code tab, the warning appears as a line in the conversation when you send
 * Run `/status` or `claude doctor` for the full diagnostic
 
 Before v2.1.248, Claude Code reported a failed settings fetch only in the debug log.
+
+### Claude Code couldn't load your organization's settings
+
+Your session hasn't started because your organization's settings, including its [server-managed settings](https://code.claude.com/docs/en/server-managed-settings.md), have to load first and Claude Code couldn't load them. For example:
+
+```text theme={null}
+Claude Code couldn't reach Anthropic to load your organization's settings (could not connect). <Organization name> requires them before a session can start.
+```
+
+If the message is in a dialog titled `Claude Code can't start this session yet`, the dialog closes and the session starts as soon as the settings load.
+
+In [non-interactive mode](https://code.claude.com/docs/en/headless.md) and in [background sessions](https://code.claude.com/docs/en/agent-view.md), Claude Code prints the message and exits with status 1 instead.
+
+**What to do:**
+
+* **`could not connect`, or `the reply came from a network proxy, not Anthropic`**: check your network connection, and on a corporate network ask IT to allow HTTPS to `api.anthropic.com/api/claude_code/policy_limits` and `api.anthropic.com/api/claude_code/settings`. Then select **Retry now**, or run your command again.
+* **`timed out`, `Anthropic returned an error`, or `Anthropic asked it to retry shortly`**: let the dialog retry, or run your command again later. Check [status.anthropic.com](https://status.anthropic.com) if it keeps happening.
+* **`still loading`, or `couldn't verify your sign-in with Anthropic yet`**: let the dialog retry, or run your command again. If the sign-in message keeps coming back, sign in again by running `claude auth login` in your shell.
+* **`Your Claude session has expired`**: the sign-in stored on this machine is no longer valid, so retrying won't help. In the dialog, select **Sign in again** to close Claude Code; then, in your shell, run `claude auth login`, which works even while sessions can't start.
+* **`none of the settings the server returned could be applied as written`**: ask your administrator to correct the organization's [server-managed settings](https://code.claude.com/docs/en/server-managed-settings.md#invalid-entries-in-delivered-settings), then retry.
 
 ### Managed settings were not approved
 
