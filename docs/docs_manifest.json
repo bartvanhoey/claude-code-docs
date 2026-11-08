@@ -496,8 +496,8 @@
     "desktop.md": {
       "original_url": "https://code.claude.com/docs/en/desktop",
       "original_md_url": "https://code.claude.com/docs/en/desktop.md",
-      "hash": "3f1f9c68b029bd8d764737eea843484298a2eb95a855b856c2e3cd18794c9d6a",
-      "last_updated": "2026-11-07T00:34:21.276973"
+      "hash": "68301c0f4a4caa2b54f3c3e6e4c220d64c6d1629b056ba40f633ee5dcc2fb112",
+      "last_updated": "2026-11-08T19:17:28.356466"
     },
     "desktop-ios-simulator.md": {
       "original_url": "https://code.claude.com/docs/en/desktop-ios-simulator",
@@ -1108,8 +1108,8 @@
     "settings-reference.md": {
       "original_url": "https://code.claude.com/docs/en/settings-reference",
       "original_md_url": "https://code.claude.com/docs/en/settings-reference.md",
-      "hash": "750178640885c05aca6863790ed7acc588ff34ce57be6cfae25787addd42ba09",
-      "last_updated": "2026-11-07T00:35:15.739329"
+      "hash": "93c77ec892dd42dbe94cb5f47995ffb61e3cbd8ddb2d9b6fdd54878006b71747",
+      "last_updated": "2026-11-08T19:18:28.471695"
     },
     "setup.md": {
       "original_url": "https://code.claude.com/docs/en/setup",
@@ -1365,8 +1365,8 @@
     }
   },
   "fetch_metadata": {
-    "last_fetch_completed": "2026-11-08T12:38:34.672498",
-    "fetch_duration_seconds": 121.227552,
+    "last_fetch_completed": "2026-11-08T19:18:53.523799",
+    "fetch_duration_seconds": 136.666064,
     "total_pages_discovered": 227,
     "pages_fetched_successfully": 228,
     "pages_failed": 0,
@@ -1376,7 +1376,7 @@
     "total_files": 227,
     "fetch_tool_version": "3.0"
   },
-  "last_updated": "2026-11-08T12:38:34.672523",
+  "last_updated": "2026-11-08T19:18:53.523822",
   "base_url": "https://raw.githubusercontent.com/bartvanhoey/claude-code-docs/main/docs/",
   "github_repository": "bartvanhoey/claude-code-docs",
   "github_ref": "main",
