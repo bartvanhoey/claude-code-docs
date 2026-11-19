@@ -475,7 +475,7 @@ These timeouts bound how long a call can run, not always how long it blocks the 
 
 ### Automatic backgrounding of long tool calls
 
-If a background call's detail view in [`/tasks`](https://code.claude.com/docs/en/commands#all-commands) shows `runs on the server; survives exiting this session`, see [MCP tasks that run on the server](#mcp-tasks-that-run-on-the-server).
+If a background call's detail view in [`/tasks`](https://code.claude.com/docs/en/commands#all-commands) says the call keeps running after you exit, see [MCP tasks that run on the server](#mcp-tasks-that-run-on-the-server).
 
 An MCP tool call in the main conversation that is still running after two minutes moves to a background task instead of blocking the session. Claude receives the task ID immediately and keeps working, and the result arrives as a task notification when the call settles.
 
@@ -528,7 +528,7 @@ In a [non-interactive](https://code.claude.com/docs/en/headless.md) session, Cla
 
 #### Exit, clear, or resume while an MCP task runs
 
-A task on a remote server keeps running after you exit. A stdio server's process stops when Claude Code exits, though its tasks show `runs on the server; survives exiting this session` in `/tasks`. Unless that server's documentation says the work outlives the process, let those tasks finish or stop them in `/tasks` first.
+A task on a remote server keeps running after you exit. A stdio server's process stops when Claude Code exits, even though `/tasks` says the server's tasks keep running. Unless that server's documentation says the work outlives the process, let those tasks finish or stop them in `/tasks` first.
 
 | Situation | What happens to the task | What you can do |
 | - | - | - |
