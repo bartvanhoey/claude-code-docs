@@ -295,7 +295,7 @@ Claude Code skips the setting because those files are stored in the project dire
 You can keep working as you are. If you want browser tools, or want the warning gone, do one of these:
 
 * **To get browser tools now**: exit and start again with `claude --chrome` in your shell.
-* **To get browser tools in later sessions**: run `/chrome` at the Claude Code prompt and select [**Enabled by default**](#enable-chrome-by-default). This applies to sessions you start afterward, not the one that's running.
+* **To get browser tools in later sessions**: run `/chrome` at the Claude Code prompt and [turn Chrome on by default](#enable-chrome-by-default).
 * **To stop the warning without browser tools**: remove the `CLAUDE_CODE_ENABLE_CFC` line from the project's settings file.
 
 ### Browser not responding
