@@ -444,11 +444,9 @@ Your prompt is back in the box you sent it from.
 * `Unable to get organization UUID`
 * ``Cloud sessions need a claude.ai sign-in. Run `claude auth login` (or /login in a local session), then try again.``
 * ``Cloud sessions aren't available with this Console sign-in. They need a claude.ai sign-in. Run `claude auth login` (or /login in a local session), then try again.``
-* `Error loading Claude Code sessions` in the session picker, when you run `claude --teleport` without a session ID
+* `Couldn't load cloud sessions` in the session picker, when you run `claude --teleport` without a session ID. Before v2.1.328, it read `Couldn't load Claude Code sessions` or `Error loading Claude Code sessions`
 
 Run [`claude auth login`](https://code.claude.com/docs/en/cli-reference#cli-commands) in your shell to sign in with your claude.ai account, then retry the command. Inside a running session, `/login` does the same. If the error names your provider instead, see the [error table](#errors-when-sending-to-a-cloud-session): cloud sessions aren't available through third-party providers.
-
-From v2.1.274 through v2.1.289, the sign-in message read `Claude Code cloud sessions require authentication with a Claude.ai account. API key authentication is not sufficient. Please run /login to authenticate, or check your authentication status with /status.`
 
 ### Branch is not on GitHub
 
